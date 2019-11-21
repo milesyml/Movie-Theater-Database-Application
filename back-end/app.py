@@ -3,6 +3,7 @@ from flask_mysqldb import MySQL
 
 app = Flask(__name__)
 
+#SQL Server Details Here
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'test'
 app.config['MYSQL_PASSWORD'] = 'password1234'
@@ -22,13 +23,15 @@ def get_users():
     cur.close()
     return str(rv)
 
+#Screen 3
 @app.route('/user_register', methods=['POST'])
 def user_register():
     if request.method == "POST":
-        user = request.json['user']
-        pw = request.json['pw']
-        first = request.json['first']
-        last = request.json['last']
+        details = request.json
+        user = details['user']
+        pw = details['pw']
+        first = details['first']
+        last = details['last']
 
         try:
             cur = mysql.connection.cursor()
