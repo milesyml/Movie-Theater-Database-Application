@@ -23,6 +23,26 @@ def get_users():
     cur.close()
     return str(rv)
 
+#Screen 1
+@app.route('/user_login', methods=['POST'])
+def user_login():
+    if request.method == "POST":
+        details = request.json
+        user = details['user']
+        pw = details['pw']
+        cur = mysql.connection.cursor()
+        cur.callproc('user_login', [user,pw]) #Call login procedure
+        cur.execute('SELECT * FROM userlogin') #Check login results
+        rv = cur.fetchall()
+        cur.close()
+
+        if not rv: #Failed login
+            return 'Login Failed'
+            
+        status, isCustomer, isAdmin, isManager = rv[0][1], rv[0][2], rv[0][3], rv[0][4]
+
+        return str(rv)
+
 #Screen 3
 @app.route('/user_register', methods=['POST'])
 def user_register():
@@ -42,14 +62,18 @@ def user_register():
         except:
             return "Error occured"
 
+#Screen 4
+#Similar to user_register
+
 #Get companies (Screen 5/6)
 @app.route('/get_companies', methods=['GET'])
 def get_companies():
-    cur = mysql.connection.cursor()
-    cur.execute('SELECT * FROM company')
-    rv = cur.fetchall()
-    cur.close()
-    return jsonify(rv)
+    if request.method == "GET":
+        cur = mysql.connection.cursor()
+        cur.execute('SELECT * FROM company')
+        rv = cur.fetchall()
+        cur.close()
+        return jsonify(rv)
 
 if __name__ == '__main__':
     app.run(debug=True)
