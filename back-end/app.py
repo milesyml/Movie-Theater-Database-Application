@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from flask_mysqldb import MySQL
 
 app = Flask(__name__)
@@ -41,6 +41,15 @@ def user_register():
             return "User Registered"
         except:
             return "Error occured"
+
+#Get companies (Screen 5/6)
+@app.route('/get_companies', methods=['GET'])
+def get_companies():
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT * FROM company')
+    rv = cur.fetchall()
+    cur.close()
+    return jsonify(rv)
 
 if __name__ == '__main__':
     app.run(debug=True)
