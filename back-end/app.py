@@ -134,6 +134,36 @@ def decline_user():
 
 #Screen 14 (Admin Filter Company)
 
+#Screen 15 (Get Eligible Managers)
+# @app.route('/get_eligible_managers', methods=['GET'])
+# def get_eligible_managers():
+#     if request.method == "GET":
+#         cur = connection.cursor()
+#         cur.execute(""" select concat(firstname,' ',lastname) as fullName from user where username in 
+#                         (select username from manager where username not in 
+#                         (select managerusername from theater)); """)
+#         rv = cur.fetchall()
+#         cur.close()
+#         return jsonify(rv)
+
+@app.route('/get_eligible_managers', methods=['POST'])
+def get_eligible_managers():
+    if request.method == "POST":
+        comName = request.json['comName']
+
+        try:
+            cur = connection.cursor()
+            cur.execute(""" select concat(firstname,' ',lastname) as fullName from user where username in
+                            (select username from manager 
+                            where username not in (select managerusername from theater where company = '{}')
+                            and company = '{}');""".format(comName,comName))
+            rv = cur.fetchall()
+            cur.close()
+            return jsonify(rv)
+        except mysql.connector.Error as error:
+            cur.close()
+            return "Error occured: {}".format(error)
+
 #Screen 15 (Admin Create Theater)
 @app.route('/admin_create_theater', methods=['POST'])
 def admin_create_theater():
@@ -153,6 +183,41 @@ def admin_create_theater():
             cur.close()
             return "Failed to execute stored procedure: {}".format(error)
 
+#Screen 16 (Company Detail for Employee)
+@app.route('/admin_view_comDetail_emp', methods=['POST'])
+def admin_view_comDetail_emp():
+    if request.method == "POST":
+        comName = request.json['comName']
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('admin_view_comDetail_emp', [comName])
+            cur.execute('select concat(empfirstname, " ", emplastname) from adcomdetailemp')
+            rv = cur.fetchall()
+            cur.close()
+            return jsonify(rv)
+        except mysql.connector.Error as error:
+            cur.close()
+            return "Failed to execute stored procedure: {}".format(error)
+
+#Screen 16 (Company Detail for Theater)
+@app.route('/admin_view_comDetail_th', methods=['POST'])
+def admin_view_comDetail_th():
+    if request.method == "POST":
+        comName = request.json['comName']
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('admin_view_comDetail_th', [comName])
+            cur.execute("""SELECT thName, concat(firstname, ' ', lastname) as manName, thCity, thState, thCapacity FROM 
+                            team36.adcomdetailth inner join user on thManagerUsername = username; """)
+            rv = cur.fetchall()
+            items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
+            cur.close()
+            return jsonify(items)
+        except mysql.connector.Error as error:
+            cur.close()
+            return "Failed to execute stored procedure: {}".format(error)
 
 if __name__ == '__main__':
     app.run(debug=True)
