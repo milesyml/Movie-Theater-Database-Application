@@ -59,12 +59,32 @@ def user_register():
             cur.close()
             return "User Registered"
         except mysql.connector.Error as error:
+            cur.close()
             return "Failed to execute stored procedure: {}".format(error)
 
-#Screen 4
+#Screen 4 (Customer Insertion)
 #Similar to user_register
 
-#Get companies (Screen 5/6)
+#Screen 4/6 (Credit Card Insertion)
+@app.route('/add_credit', methods=['POST'])
+def add_credit():
+    if request.method == "POST":
+        details = request.json
+        user = details['user']
+        cards = details['cards'] #List in json
+
+        try:
+            cur = connection.cursor()
+            for card in cards:
+                cur.callproc('customer_add_creditcard', [user,card])
+            connection.commit() #Commit insertion
+            cur.close()
+            return "Cards Added"
+        except mysql.connector.Error as error:
+            cur.close()
+            return "Failed to execute stored procedure: {}".format(error)      
+
+#Screen 5/6 (Get company names)
 @app.route('/get_companies', methods=['GET'])
 def get_companies():
     if request.method == "GET":
