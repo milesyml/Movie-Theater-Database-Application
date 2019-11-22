@@ -22,13 +22,23 @@ def get_users():
     cur.close()
     return str(rv)
 
-#Screen 1
+#General (Get company names)
+@app.route('/get_companies', methods=['GET'])
+def get_companies():
+    if request.method == "GET":
+        cur = connection.cursor()
+        cur.execute('SELECT * FROM company')
+        rv = cur.fetchall()
+        cur.close()
+        return jsonify(rv)
+
+#Screen 1 (User Login)
 @app.route('/user_login', methods=['POST'])
 def user_login():
     if request.method == "POST":
         details = request.json
-        user = details['user']
-        pw = details['pw']
+        user, pw = details['user'], details['pw']
+
         cur = connection.cursor()
         cur.callproc('user_login', [user,pw]) #Call login procedure
         cur.execute('SELECT * FROM userlogin') #Check login results
@@ -42,15 +52,12 @@ def user_login():
 
         return str(rv)
 
-#Screen 3
+#Screen 3 (User Register)
 @app.route('/user_register', methods=['POST'])
 def user_register():
     if request.method == "POST":
         details = request.json
-        user = details['user']
-        pw = details['pw']
-        first = details['first']
-        last = details['last']
+        user, pw, first, last = details['user'], details['pw'], details['first'], details['last']
 
         try:
             cur = connection.cursor()
@@ -62,7 +69,7 @@ def user_register():
             cur.close()
             return "Failed to execute stored procedure: {}".format(error)
 
-#Screen 4 (Customer Insertion)
+#Screen 4 (Customer Register)
 #Similar to user_register
 
 #Screen 4/6 (Credit Card Insertion)
@@ -70,8 +77,7 @@ def user_register():
 def add_credit():
     if request.method == "POST":
         details = request.json
-        user = details['user']
-        cards = details['cards'] #List in json
+        user, cards  = details['user'], details['cards'] #List in json
 
         try:
             cur = connection.cursor()
@@ -84,15 +90,69 @@ def add_credit():
             cur.close()
             return "Failed to execute stored procedure: {}".format(error)      
 
-#Screen 5/6 (Get company names)
-@app.route('/get_companies', methods=['GET'])
-def get_companies():
-    if request.method == "GET":
-        cur = connection.cursor()
-        cur.execute('SELECT * FROM company')
-        rv = cur.fetchall()
-        cur.close()
-        return jsonify(rv)
+#Screen 5 (Manager Register)
+
+#Screen 6 (Manager-Customer Register)
+
+#Screen 13 (Admin Filter User)
+
+#Screen 13 (User Approval)
+@app.route('/admin_approve_user', methods=['POST'])
+def approve_user():
+    if request.method == "POST":
+        user = request.json['user']
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('admin_approve_user', [user])
+            connection.commit() #Commit update
+            cur.close()
+            return "User Approved"
+        except mysql.connector.Error as error:
+            cur.close()
+            return "Failed to execute stored procedure: {}".format(error)
+
+#Screen 13 (User Decline)
+@app.route('/admin_decline_user', methods=['POST'])
+def decline_user():
+    if request.method == "POST":
+        user = request.json['user']
+
+        try:
+            cur = connection.cursor()
+            cur.execute("select status from user where username = '{}'".format(user))
+            rv = cur.fetchall()
+            if str(rv[0][0]) == 'approved': #Check current approval status
+                return "Unable to decline approved user"
+            cur.callproc('admin_decline_user', [user])
+            connection.commit() #Commit update
+            cur.close()
+            return "User Declined"
+        except mysql.connector.Error as error:
+            cur.close()
+            return "Failed to execute stored procedure: {}".format(error)
+
+#Screen 14 (Admin Filter Company)
+
+#Screen 15 (Admin Create Theater)
+@app.route('/admin_create_theater', methods=['POST'])
+def admin_create_theater():
+    if request.method == "POST":
+        details = request.json
+        thName, comName, street = details['thName'], details['comName'], details['street']
+        city, state, zipCode,  = details['city'], details['state'], details['zipCode']
+        capacity, managerUser = details['capacity'], details['managerUser']
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('admin_create_theater', [thName, comName, street, city, state, zipCode, capacity, managerUser])
+            connection.commit() #Commit insertion
+            cur.close()
+            return "Theater Created"
+        except mysql.connector.Error as error:
+            cur.close()
+            return "Failed to execute stored procedure: {}".format(error)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
