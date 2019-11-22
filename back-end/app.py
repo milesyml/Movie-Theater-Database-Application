@@ -1,15 +1,14 @@
 from flask import Flask, render_template, request, jsonify
-from flask_mysqldb import MySQL
+import mysql.connector
+from mysql.connector import Error
 
 app = Flask(__name__)
 
 #SQL Server Details Here
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'test'
-app.config['MYSQL_PASSWORD'] = 'password1234'
-app.config['MYSQL_DB'] = 'team36'
-
-mysql = MySQL(app)
+connection = mysql.connector.connect(host="localhost",
+                                     user="test",
+                                     password="password1234",
+                                     database="team36")
 
 @app.route('/')
 def index():
@@ -17,7 +16,7 @@ def index():
 
 @app.route('/get_users')
 def get_users():
-    cur = mysql.connection.cursor()
+    cur = connection.cursor()
     cur.execute('SELECT * FROM user')
     rv = cur.fetchall()
     cur.close()
@@ -30,7 +29,7 @@ def user_login():
         details = request.json
         user = details['user']
         pw = details['pw']
-        cur = mysql.connection.cursor()
+        cur = connection.cursor()
         cur.callproc('user_login', [user,pw]) #Call login procedure
         cur.execute('SELECT * FROM userlogin') #Check login results
         rv = cur.fetchall()
@@ -54,13 +53,13 @@ def user_register():
         last = details['last']
 
         try:
-            cur = mysql.connection.cursor()
+            cur = connection.cursor()
             cur.callproc('user_register', [user,pw,first,last])
-            mysql.connection.commit() #Commit insertion
+            connection.commit() #Commit insertion
             cur.close()
             return "User Registered"
-        except:
-            return "Error occured"
+        except mysql.connector.Error as error:
+            return "Failed to execute stored procedure: {}".format(error)
 
 #Screen 4
 #Similar to user_register
@@ -69,7 +68,7 @@ def user_register():
 @app.route('/get_companies', methods=['GET'])
 def get_companies():
     if request.method == "GET":
-        cur = mysql.connection.cursor()
+        cur = connection.cursor()
         cur.execute('SELECT * FROM company')
         rv = cur.fetchall()
         cur.close()
