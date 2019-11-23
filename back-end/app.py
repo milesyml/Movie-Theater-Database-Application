@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import mysql.connector
 from mysql.connector import Error
+from dateutil import parser
 
 app = Flask(__name__)
 
@@ -10,6 +11,8 @@ connection = mysql.connector.connect(host="localhost",
                                      password="password1234",
                                      database="team36")
 
+#implement constraints in SQL / here?
+
 @app.route('/')
 def index():
     return 'Hello World!'
@@ -17,17 +20,27 @@ def index():
 @app.route('/get_users')
 def get_users():
     cur = connection.cursor()
-    cur.execute('SELECT * FROM user')
+    cur.execute('SELECT username FROM user')
     rv = cur.fetchall()
     cur.close()
-    return str(rv)
+    return jsonify(rv)
 
 #General (Get company names)
 @app.route('/get_companies', methods=['GET'])
 def get_companies():
     if request.method == "GET":
         cur = connection.cursor()
-        cur.execute('SELECT * FROM company')
+        cur.execute('SELECT name FROM company')
+        rv = cur.fetchall()
+        cur.close()
+        return jsonify(rv)
+
+#General (Get movie names)
+@app.route('/get_movies', methods=['GET'])
+def get_movies():
+    if request.method == "GET":
+        cur = connection.cursor()
+        cur.execute('SELECT name FROM movie')
         rv = cur.fetchall()
         cur.close()
         return jsonify(rv)
@@ -211,6 +224,168 @@ def admin_view_comDetail_th():
             cur.callproc('admin_view_comDetail_th', [comName])
             cur.execute("""SELECT thName, concat(firstname, ' ', lastname) as manName, thCity, thState, thCapacity FROM 
                             team36.adcomdetailth inner join user on thManagerUsername = username; """)
+            rv = cur.fetchall()
+            items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
+            cur.close()
+            return jsonify(items)
+        except mysql.connector.Error as error:
+            cur.close()
+            return "Failed to execute stored procedure: {}".format(error)
+
+#Screen 17 (Create Movie)
+@app.route('/admin_create_mov', methods=['POST'])
+def admin_create_mov():
+    if request.method == "POST":
+        details = request.json
+        name, duration, date = details['name'], details['duration'], details['date']
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('admin_create_mov', [name, duration, date])
+            connection.commit() #Commit insertion
+            cur.close()
+            return "Movie Created"
+        except mysql.connector.Error as error:
+            cur.close()
+            return "Failed to execute stored procedure: {}".format(error)
+
+#Screen 18 (Manager Filter Theater)
+
+#Screen 19 (Manager Schedule Movie)
+#Untested
+@app.route('/manager_schedule_mov', methods=['POST'])
+def manager_schedule_mov():
+    if request.method == "POST":
+        details = request.json
+        manName, movName = details['manName'], details['movName']
+        releaseDate, playDate = details['releaseDate'], details['playDate']
+
+        if parser.parse(playDate) < parser.parse(releaseDate):
+            return "Release Date must be before Play Date"
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('manager_schedule_mov', [manName, movName, releaseDate, playDate])
+            connection.commit() #Commit insertion
+            cur.close()
+            return "Movie Scheduled"
+        except mysql.connector.Error as error:
+            cur.close()
+            return "Failed to execute stored procedure: {}".format(error)
+
+#Screen 20 (Get Customer's Cards)
+@app.route('/get_customer_cards', methods=['POST'])
+def get_customer_cards():
+    if request.method == "POST":
+        details = request.json
+        user = details['user']
+
+        cur = connection.cursor()
+        cur.execute("SELECT creditcardnumber FROM creditcard where username = '{}'".format(user))
+        rv = cur.fetchall()
+        cur.close()
+        return jsonify(rv)
+
+#Screen 20 (Customer Filter Movie)
+
+#Screen 20 (Customer View Movie)
+#Untested & logical constraint of 3 movies per day not added
+@app.route('/customer_view_movie', methods=['POST'])
+def customer_view_movie():
+    if request.method == "POST":
+        details = request.json
+        cardNum, movName, releaseDate = details['cardNum'], details['movName'], details['releaseDate']
+        thName, comName, playDate = details['thName'], details['comName'], details['playDate']
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('customer_view_movie', [cardNum, movName, releaseDate, thName, comName, playDate])
+            connection.commit() #Commit insertion
+            cur.close()
+            return "Viewing Added"
+        except mysql.connector.Error as error:
+            cur.close()
+            return "Failed to execute stored procedure: {}".format(error)
+
+#Screen 21 (Customer View History)
+@app.route('/customer_view_history', methods=['POST'])
+def customer_view_history():
+    if request.method == "POST":
+        user = request.json['user']
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('customer_view_history', [user])
+            cur.execute("select * from cosviewhistory")
+            rv = cur.fetchall()
+            items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
+            cur.close()
+            return jsonify(items)
+        except mysql.connector.Error as error:
+            cur.close()
+            return "Failed to execute stored procedure: {}".format(error)
+
+#Screen 22 (Get Theater Names)
+@app.route('/get_theater', methods=['GET'])
+def get_theater():
+    if request.method == "GET":
+        cur = connection.cursor()
+        cur.execute('SELECT name FROM theater')
+        rv = cur.fetchall()
+        rv.insert(0,['ALL'])
+        cur.close()
+        return jsonify(rv)
+
+#Screen 22 (User Filter Theater)
+#Untested, procedure needs to be fixed
+@app.route('/user_filter_th', methods=['POST'])
+def user_filter_th():
+    if request.method == "POST":
+        details = request.json
+        thName, comName, city, state = details['thName'], details['comName'], details['city'], details['state']
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('user_filter_th', [thName, comName, city, state])
+            cur.execute("select * from userfilterth")
+            rv = cur.fetchall()
+            items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
+            cur.close()
+            return jsonify(items)
+        except mysql.connector.Error as error:
+            cur.close()
+            return "Failed to execute stored procedure: {}".format(error)
+
+#Screen 22 (User Visit Theater)
+#Untested, procedure needs to be fixed
+@app.route('/user_visit_th', methods=['POST'])
+def user_visit_th():
+    if request.method == "POST":
+        details = request.json
+        thName, comName, date, user = details['thName'], details['comName'], details['date'], details['user']
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('user_visit_th', [thName, comName, date, user])
+            connection.commit() #Commit insertion
+            cur.close()
+            return "Visit Logged"
+        except mysql.connector.Error as error:
+            cur.close()
+            return "Failed to execute stored procedure: {}".format(error)
+
+#Screen 23 (User Filter Visit History)
+#Untested, procedure needs to be fixed
+@app.route('/user_filter_visitHistory', methods=['POST'])
+def user_filter_visitHistory():
+    if request.method == "POST":
+        details = request.json
+        user, minDate, maxDate = details['user'], details['minDate'], details['maxDate']
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('user_filter_visitHistory', [user, minDate, maxDate])
+            cur.execute("select * from uservisithistory")
             rv = cur.fetchall()
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
