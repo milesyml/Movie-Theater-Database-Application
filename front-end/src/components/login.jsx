@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Form, Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
+
 class Login extends Component {
   state = {
     username: "",
@@ -18,20 +19,19 @@ class Login extends Component {
     console.log("Submit");
     e.preventDefault();
     console.log(this.state);
+    // fetch from server side and then go to website.
+    this.props.history.push("/AdminOnlyFunctionality");
   };
 
   render() {
     return (
-      <div
-        className="Login"
-        style={{ textAlign: "center", lineHeight: 1.6, padding: 180 }}
-      >
-        <Form onSubmit={this.handleSubmit}>
+      <div className="center-div">
+        <Form style={{ width: 400, height: 200 }} onSubmit={this.handleSubmit}>
           <h1>Atlanta Movie Login</h1>
-          <div className="InputField">
+          <div className="InputField" style={{ marginTop: 20 }}>
             <label htmlFor="username">Username: </label>
             <input
-              type="username"
+              type="text"
               id="username"
               onChange={this.handleChange}
             ></input>
@@ -44,11 +44,18 @@ class Login extends Component {
               onChange={this.handleChange}
             ></input>
           </div>
-          <div>
-            <button className="btn pink lighten-1 z-depth-0">Login</button>
+          <div style={{ marginTop: 10 }}>
+            <button
+              type="submit"
+              className="btn btn-secondary lighten-1 z-depth-0"
+            >
+              Login
+            </button>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <Link to="/register">
-              <button className="btn pink lighten-1 z-depth-0">Register</button>
+              <button className="btn btn-secondary lighten-1 z-depth-0">
+                Register
+              </button>
             </Link>
           </div>
         </Form>
