@@ -19,8 +19,6 @@ class Login extends Component {
     console.log("Submit");
     e.preventDefault();
     console.log(this.state);
-    // fetch from server side and then go to website.
-    this.props.history.push("/AdminOnlyFunctionality");
   };
 
   render() {
@@ -45,12 +43,14 @@ class Login extends Component {
             ></input>
           </div>
           <div style={{ marginTop: 10 }}>
-            <button
-              type="submit"
-              className="btn btn-secondary lighten-1 z-depth-0"
-            >
-              Login
-            </button>
+            <Link to="/adminOnlyFunctionality">
+              <button
+                type="submit"
+                className="btn btn-secondary lighten-1 z-depth-0"
+              >
+                Login
+              </button>
+            </Link>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <Link to="/register">
               <button className="btn btn-secondary lighten-1 z-depth-0">
