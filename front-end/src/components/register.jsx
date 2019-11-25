@@ -19,10 +19,7 @@ class Register extends Component {
 
   render() {
     return (
-      <div
-        className="Login"
-        style={{ textAlign: "center", lineHeight: 1.6, padding: 180 }}
-      >
+      <div className="center-div">
         <h1>Register Navigation</h1>
         <div className="btn-group">
           <Button style={this.btnStyle}>User Only</Button>
