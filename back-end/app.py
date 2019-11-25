@@ -56,14 +56,16 @@ def user_login():
         cur.callproc('user_login', [user,pw]) #Call login procedure
         cur.execute('SELECT * FROM userlogin') #Check login results
         rv = cur.fetchall()
-        cur.close()
 
         if not rv: #Failed login
+            cur.close()
             return 'Login Failed'
             
         status, isCustomer, isAdmin, isManager = rv[0][1], rv[0][2], rv[0][3], rv[0][4]
+        items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
+        cur.close()
+        return jsonify(items)
 
-        return str(rv)
 
 #Screen 3 (User Register)
 @app.route('/user_register', methods=['POST'])
