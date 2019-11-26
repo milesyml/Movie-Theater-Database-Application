@@ -5,6 +5,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import NotFound from "./components/NotFound";
 import AdminOnlyFunctionality from "./components/AdminOnlyFunctionality";
+import ManageUser from "./components/ManageUser";
 
 class App extends Component {
   goToHome = childProps => {
@@ -52,6 +53,7 @@ class App extends Component {
                 />
               )}
             />
+            <Route path="/ManageUser" component={ManageUser} />
             <Route component={NotFound} />
           </Switch>
         </div>

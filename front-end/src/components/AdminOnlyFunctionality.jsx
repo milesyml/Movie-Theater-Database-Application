@@ -37,7 +37,7 @@ class AdminOnlyFunctionality extends Component {
           </div>
         </div>*/}
 
-        <div className="col-btn">
+        <div className="col-2-btn">
           <button
             onClick={() => this.props.goToManageUser(this.props)}
             className="btn btn-primary m-1 btn-block"
