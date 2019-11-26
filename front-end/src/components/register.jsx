@@ -26,9 +26,15 @@ class Register extends Component {
         <Link to={"/register/userOnly"}>
           <Button style={this.btnStyle}>User Only</Button>
         </Link>
-        <Button style={this.btnStyle}>Customer Only</Button>
-        <Button style={this.btnStyle}>Manager Only</Button>
-        <Button style={this.btnStyle}>Manager Customer</Button>
+        <Link to={"/register/customerOnly"}>
+          <Button style={this.btnStyle}>Customer Only</Button>
+        </Link>
+        <Link to={"/register/managerOnly"}>
+          <Button style={this.btnStyle}>Manager Only</Button>
+        </Link>
+        <Link to={"/register/managerCustomer"}>
+          <Button style={this.btnStyle}>Manager Customer</Button>
+        </Link>
         <Link to={"/"}>
           <Button style={this.btnStyle}>Back</Button>
         </Link>

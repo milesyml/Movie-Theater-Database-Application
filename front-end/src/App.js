@@ -6,7 +6,9 @@ import Register from "./components/Register";
 import NotFound from "./components/NotFound";
 import AdminOnlyFunctionality from "./components/AdminOnlyFunctionality";
 import UserRegistration from "./components/UserRegister";
-
+import CustomerRegistration from "./components/CustomerRegister";
+import ManagerRegistration from "./components/ManagerRegister";
+import ManagerCustomerRegistration from "./components/ManagerCustomerRegister";
 class App extends Component {
   render() {
     return (
@@ -20,6 +22,18 @@ class App extends Component {
                 <Route
                   path="/register/userOnly"
                   component={UserRegistration}
+                ></Route>
+                <Route
+                  path="/register/customerOnly"
+                  component={CustomerRegistration}
+                ></Route>
+                <Route
+                  path="/register/managerOnly"
+                  component={ManagerRegistration}
+                ></Route>
+                <Route
+                  path="/register/managerCustomer"
+                  component={ManagerCustomerRegistration}
                 ></Route>
               </Switch>
             </Route>

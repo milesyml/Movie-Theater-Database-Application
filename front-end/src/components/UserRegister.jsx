@@ -3,7 +3,13 @@ import { Form, Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 class UserRegistration extends Component {
-  state = {};
+  state = {
+    firstName: "",
+    lastName: "",
+    username: "",
+    password: "",
+    confirmPassword: ""
+  };
 
   handleChange = e => {
     console.log("Change");
@@ -22,20 +28,33 @@ class UserRegistration extends Component {
     padding: 10
   };
 
+  btnStyle = {
+    textAlign: "center",
+    padding: 10,
+    margin: 10
+  };
+
   render() {
     return (
-      <div className="userRegister" style={{ lineHeight: 1.6, padding: 180 }}>
+      <div
+        className="userRegister"
+        style={{ lineHeight: 1.6, padding: 80, justifyContent: "center" }}
+      >
         <h1>User Registration</h1>
         <Form onSubmit={this.handleSubmit}>
           <div className="InputField" style={this.style}>
-            <label htmlFor="firstName">First Name: </label>
+            <label htmlFor="firstName" style={{ padding: 10 }}>
+              First Name:{" "}
+            </label>
             <input
               type="firstName"
               id="firstName"
               onChange={this.handleChange}
             ></input>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <label htmlFor="lastName">Last Name: </label>
+            <label htmlFor="lastName" style={{ padding: 10 }}>
+              Last Name:{" "}
+            </label>
             <input
               type="lastName"
               id="lastName"
@@ -43,7 +62,9 @@ class UserRegistration extends Component {
             ></input>
           </div>
           <div className="InputField" style={this.style}>
-            <label htmlFor="username">Username: </label>
+            <label htmlFor="username" style={{ padding: 10 }}>
+              Username:{" "}
+            </label>
             <input
               type="username"
               id="username"
@@ -51,14 +72,18 @@ class UserRegistration extends Component {
             ></input>
           </div>
           <div className="InputField" style={this.style}>
-            <label htmlFor="password">Password: </label>
+            <label htmlFor="password" style={{ padding: 10 }}>
+              Password:{" "}
+            </label>
             <input
               type="password"
               id="password"
               onChange={this.handleChange}
             ></input>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <label htmlFor="confirmPassword">Confirm Password: </label>
+            <label htmlFor="confirmPassword" style={{ padding: 10 }}>
+              Confirm Password:{" "}
+            </label>
             <input
               type="password"
               id="confirmPassword"
@@ -67,10 +92,12 @@ class UserRegistration extends Component {
           </div>
           <div>
             <Link to="/register">
-              <button className="btn pink lighten-1 z-depth-0">Back</button>
+              <Button style={this.btnStyle}>Back</Button>
             </Link>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <button className="btn pink lighten-1 z-depth-0">Register</button>
+            <Button style={this.btnStyle} onClick={this.handleSubmit}>
+              Register
+            </Button>
           </div>
         </Form>
       </div>
