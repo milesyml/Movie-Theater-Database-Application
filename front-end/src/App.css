@@ -20,3 +20,24 @@
 .App-link {
   color: #09d3ac;
 }
+
+.center-div {
+  text-align: center;
+  line-height: 1.6;
+  padding: 180px;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.col-btn {
+  display: grid;
+  justify-content: space-around;
+  align-content: center;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  column-gap: 15px;
+  justify-items: center;
+  align-items: center;
+}

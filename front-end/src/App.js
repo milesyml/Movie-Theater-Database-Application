@@ -1,26 +1,63 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import "./App.css";
+import { BrowserRouter, Switch, Route } from "react-router-dom";
+import Login from "./components/Login";
+import Register from "./components/Register";
+import NotFound from "./components/NotFound";
+import AdminOnlyFunctionality from "./components/AdminOnlyFunctionality";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+  goToHome = childProps => {
+    childProps.history.push("/");
+  };
+
+  goToManageUser = childProps => {
+    childProps.history.push("/ManageUser");
+  };
+
+  goToManageCompany = childProps => {
+    childProps.history.push("/ManageCompany");
+  };
+
+  goToCreateMovie = childProps => {
+    childProps.history.push("/CreateMovie");
+  };
+
+  goToExploreTheater = childProps => {
+    childProps.history.push("/ExploreTheater");
+  };
+
+  goToVisithistory = childProps => {
+    childProps.history.push("/VisitHistory");
+  };
+
+  render() {
+    return (
+      <BrowserRouter>
+        <div className="App">
+          <Switch>
+            <Route exact path="/" component={Login}></Route>
+            <Route path="/register" component={Register}></Route>
+            <Route
+              path="/adminonlyfunctionality"
+              render={props => (
+                <AdminOnlyFunctionality
+                  {...props}
+                  goToManageUser={this.goToManageUser}
+                  goToManageCompany={this.goToManageCompany}
+                  goToCreateMovie={this.goToCreateMovie}
+                  goToExploreTheater={this.goToExploreTheater}
+                  goToVisithistory={this.goToVisithistory}
+                  goToHome={this.goToHome}
+                />
+              )}
+            />
+            <Route component={NotFound} />
+          </Switch>
+        </div>
+      </BrowserRouter>
+    );
+  }
 }
 
 export default App;
