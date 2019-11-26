@@ -5,10 +5,12 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import NotFound from "./components/NotFound";
 import AdminOnlyFunctionality from "./components/AdminOnlyFunctionality";
+import ManageUser from "./components/ManageUser";
 import UserRegistration from "./components/UserRegister";
 import CustomerRegistration from "./components/CustomerRegister";
 import ManagerRegistration from "./components/ManagerRegister";
 import ManagerCustomerRegistration from "./components/ManagerCustomerRegister";
+
 class App extends Component {
   render() {
     return (
@@ -37,40 +39,11 @@ class App extends Component {
                 ></Route>
               </Switch>
             </Route>
-
             <Route
               path="/adminOnlyFunctionality"
               component={AdminOnlyFunctionality}
-            >
-              <Switch>
-                <Route
-                  exact
-                  path="/adminOnlyFunctionality"
-                  component={AdminOnlyFunctionality}
-                ></Route>
-                <Route
-                  path="/adminonlyfunctionality/manageUser"
-                  component={NotFound}
-                ></Route>
-                <Route
-                  path="/adminonlyfunctionality/manageCompany"
-                  component={NotFound}
-                ></Route>
-                <Route
-                  path="/adminonlyfunctionality/createMovie"
-                  component={NotFound}
-                ></Route>
-                <Route
-                  path="/adminonlyfunctionality/exploreTheater"
-                  component={NotFound}
-                ></Route>
-                <Route
-                  path="/adminonlyfunctionality/visitHistory"
-                  component={NotFound}
-                ></Route>
-              </Switch>
-            </Route>
-
+            ></Route>
+            <Route path="/manageUser" component={ManageUser} />
             <Route component={NotFound} />
           </Switch>
         </div>
