@@ -7,73 +7,39 @@ class AdminOnlyFunctionality extends Component {
     return (
       <div className="center-div">
         <h1>Admin-Only Functionality</h1>
+        <div className="col-btn">
+          <Link to="/manageUser">
+            <button className="btn btn-primary m-1 btn-block">
+              Manage User
+            </button>
+          </Link>
+          <Link to="/manageCompany">
+            <button className="btn btn-primary m-1 btn-block">
+              Manage Company
+            </button>
+          </Link>
 
-        {/* <div className="container">
-          <div className="row justify-center">
-            <div className="col-xs-2">
-              <button className="btn btn-primary m-2">Manage User</button>
-            </div>
-            <div className="col-xs-2">
-              <button className="btn btn-primary m-2">Explore Theater</button>
-            </div>
-          </div>
-          <div className="row justify-center">
-            <div className="col-xs-2">
-              <button className="btn btn-primary m-2">Manage Company</button>
-            </div>
-            <div className="col-xs-2">
-              <button className="btn btn-primary m-2">Visit History</button>
-            </div>
-          </div>
-          <div className="row justify-center">
-            <div className="col-xs-2">
-              <button className="btn btn-primary m-2">Create Movie</button>
-            </div>
-            <div className="col-xs-2">
-              <Link to="/">
-                <button className="btn btn-primary m-2">Back</button>
-              </Link>
-            </div>
-          </div>
-        </div>*/}
+          <Link to="/createMovie">
+            <button className="btn btn-primary m-1 btn-block">
+              Create Movie
+            </button>
+          </Link>
 
-        <div className="col-2-btn">
-          <button
-            onClick={() => this.props.goToManageUser(this.props)}
-            className="btn btn-primary m-1 btn-block"
-          >
-            Manage User
-          </button>
-          <button
-            onClick={() => this.props.goToManageCompany(this.props)}
-            className="btn btn-primary m-1 btn-block"
-          >
-            Manage Company
-          </button>
-          <button
-            onClick={() => this.props.goToCreateMovie(this.props)}
-            className="btn btn-primary m-1 btn-block"
-          >
-            Create Movie
-          </button>
-          <button
-            onClick={() => this.props.goToExploreTheater(this.props)}
-            className="btn btn-primary m-1 btn-block"
-          >
-            Explore Theater
-          </button>
-          <button
-            onClick={() => this.props.goToVisithistory(this.props)}
-            className="btn btn-primary m-1 btn-block"
-          >
-            Visit History
-          </button>
-          <button
-            onClick={() => this.props.goToHome(this.props)}
-            className="btn btn-primary m-1 btn-block"
-          >
-            Back
-          </button>
+          <Link to="/exploreTheater">
+            <button className="btn btn-primary m-1 btn-block">
+              Explore Theater
+            </button>
+          </Link>
+
+          <Link to="/visitHistory">
+            <button className="btn btn-primary m-1 btn-block">
+              Visit History
+            </button>
+          </Link>
+
+          <Link to="/">
+            <button className="btn btn-primary m-1 btn-block">Back</button>
+          </Link>
         </div>
       </div>
     );
