@@ -56,7 +56,7 @@ def get_movies():
 def user_login():
     if request.method == "POST":
         details = request.json
-        user, pw = details['user'], details['pw']
+        user, pw = details['userName'], details['password']
 
         try:
             cur = connection.cursor()
@@ -71,7 +71,7 @@ def user_login():
             #status, isCustomer, isAdmin, isManager = rv[0][1], rv[0][2], rv[0][3], rv[0][4]
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
-            return jsonify(items)
+            return items
         except mysql.connector.IntegrityError as error:
             cur.close()
             msg = "Input Error: {}".format(error)
@@ -87,7 +87,7 @@ def user_login():
 def user_register():
     if request.method == "POST":
         details = request.json
-        user, pw, first, last = details['user'], details['pw'], details['first'], details['last']
+        user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
 
         try:
             cur = connection.cursor()
@@ -109,7 +109,7 @@ def user_register():
 def customer_only_register():
     if request.method == "POST":
         details = request.json
-        user, pw, first, last = details['user'], details['pw'], details['first'], details['last']
+        user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
 
         try:
             cur = connection.cursor()
@@ -131,7 +131,7 @@ def customer_only_register():
 def add_credit():
     if request.method == "POST":
         details = request.json
-        user, cards  = details['user'], details['cards'] #List in json
+        user, cards  = details['userName'], details['cards'] #List in json
 
         try:
             cur = connection.cursor()
@@ -154,7 +154,7 @@ def add_credit():
 def manager_only_register():
     if request.method == "POST":
         details = request.json
-        user, pw, first, last = details['user'], details['pw'], details['first'], details['last']
+        user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
         comName, street, city = details['comName'], details['street'], details['city']
         state, zipCode = details['state'], details['zipCode']
 
@@ -178,7 +178,7 @@ def manager_only_register():
 def manager_customer_register():
     if request.method == "POST":
         details = request.json
-        user, pw, first, last = details['user'], details['pw'], details['first'], details['last']
+        user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
         comName, street, city = details['comName'], details['street'], details['city']
         state, zipCode = details['state'], details['zipCode']
 
@@ -203,7 +203,7 @@ def manager_customer_register():
 @app.route('/admin_approve_user', methods=['POST'])
 def approve_user():
     if request.method == "POST":
-        user = request.json['user']
+        user = request.json['userName']
 
         try:
             cur = connection.cursor()
@@ -224,7 +224,7 @@ def approve_user():
 @app.route('/admin_decline_user', methods=['POST'])
 def decline_user():
     if request.method == "POST":
-        user = request.json['user']
+        user = request.json['userName']
 
         try:
             cur = connection.cursor()
@@ -353,7 +353,7 @@ def admin_view_comDetail_th():
 def admin_create_mov():
     if request.method == "POST":
         details = request.json
-        name, duration, date = details['name'], details['duration'], details['date']
+        name, duration, date = details['name'], details['duration'], details['releaseDate']
 
         try:
             cur = connection.cursor()
@@ -405,7 +405,7 @@ def get_customer_cards():
     try:
         if request.method == "POST":
             details = request.json
-            user = details['user']
+            user = details['userName']
 
             cur = connection.cursor()
             cur.execute("SELECT creditcardnumber FROM creditcard where username = '{}'".format(user))
@@ -446,7 +446,7 @@ def customer_view_movie():
 @app.route('/customer_view_history', methods=['POST'])
 def customer_view_history():
     if request.method == "POST":
-        user = request.json['user']
+        user = request.json['userName']
 
         try:
             cur = connection.cursor()
@@ -513,7 +513,7 @@ def user_filter_th():
 def user_visit_th():
     if request.method == "POST":
         details = request.json
-        thName, comName, date, user = details['thName'], details['comName'], details['date'], details['user']
+        thName, comName, date, user = details['thName'], details['comName'], details['date'], details['userName']
 
         try:
             cur = connection.cursor()
@@ -536,7 +536,7 @@ def user_visit_th():
 def user_filter_visitHistory():
     if request.method == "POST":
         details = request.json
-        user, minDate, maxDate = details['user'], details['minDate'], details['maxDate']
+        user, minDate, maxDate = details['userName'], details['minDate'], details['maxDate']
 
         try:
             cur = connection.cursor()
