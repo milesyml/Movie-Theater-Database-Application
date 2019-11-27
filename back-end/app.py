@@ -7,8 +7,8 @@ app = Flask(__name__)
 
 #SQL Server Details Here
 connection = mysql.connector.connect(host="localhost",
-                                     user="test",
-                                     password="password1234",
+                                     user="root",
+                                     password="",
                                      database="team36")
 
 @app.route('/')
@@ -71,7 +71,7 @@ def user_login():
             #status, isCustomer, isAdmin, isManager = rv[0][1], rv[0][2], rv[0][3], rv[0][4]
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
-            return jsonify(items)
+            return jsonify(items[0])
         except mysql.connector.IntegrityError as error:
             cur.close()
             msg = "Input Error: {}".format(error)

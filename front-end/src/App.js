@@ -10,6 +10,9 @@ import UserRegistration from "./components/UserRegister";
 import CustomerRegistration from "./components/CustomerRegister";
 import ManagerRegistration from "./components/ManagerRegister";
 import ManagerCustomerRegistration from "./components/ManagerCustomerRegister";
+import ManageCompany from "./components/ManageCompany";
+import CompanyDetail from "./components/CompanyDetail";
+import TheaterOverview from "./components/TheaterOverview";
 
 class App extends Component {
   render() {
@@ -44,6 +47,12 @@ class App extends Component {
               component={AdminOnlyFunctionality}
             ></Route>
             <Route path="/manageUser" component={ManageUser} />
+            <Route path="/manageCompany" component={ManageCompany} />
+            <Route
+              path="/companyDetail/:companyName"
+              component={CompanyDetail}
+            />
+            <Route path="/theaterOverview/" component={TheaterOverview} />
             <Route component={NotFound} />
           </Switch>
         </div>

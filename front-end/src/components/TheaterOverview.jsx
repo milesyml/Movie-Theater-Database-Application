@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 
-class ManageUser extends Component {
+class TheaterOverview extends Component {
   state = {
     username: "",
     status: "All",
@@ -259,4 +259,4 @@ class ManageUser extends Component {
   }
 }
 
-export default ManageUser;
+export default TheaterOverview;

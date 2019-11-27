@@ -40,28 +40,25 @@ class Login extends Component {
   };
 
   checkingSubmit = () => {
-    if (this.validation()) {
-      return (
-        <Link to={"/adminOnlyFunctionality"}>
-          <button
-            type="submit"
-            className="btn btn-secondary lighten-1 z-depth-0"
-          >
-            Login
-          </button>
-        </Link>
-      );
-    } else {
-      return (
-        <button
-          type="submit"
-          className="btn btn-secondary lighten-1 z-depth-0"
-          onClick={this.handleErrorInput}
-        >
+    // if (this.validation()) {
+    return (
+      <Link to={"/adminOnlyFunctionality"}>
+        <button type="submit" className="btn btn-secondary lighten-1 z-depth-0">
           Login
         </button>
-      );
-    }
+      </Link>
+    );
+    // } else {
+    //   return (
+    //     <button
+    //       type="submit"
+    //       className="btn btn-secondary lighten-1 z-depth-0"
+    //       onClick={this.handleErrorInput}
+    //     >
+    //       Login
+    //     </button>
+    //   );
+    // }
   };
 
   handleErrorInput = () => {
