@@ -449,12 +449,8 @@ def manager_filter_th():
         minMovDuration, maxMovDuration = none_convert(details['minMovDuration']), none_convert(details['maxMovDuration'])
         minMovReleaseDate, maxMovReleaseDate = none_convert(details['minMovReleaseDate']), none_convert(details['maxMovReleaseDate'])
         minMovPlayDate, maxMovPlayDate = none_convert(details['minMovPlayDate']), none_convert(details['maxMovPlayDate'])
-        includeNotPlayed = details['includeNotPlayed']
+        includeNotPlayed = none_convert(details['includeNotPlayed'])
 
-        minMovDuration, maxMovDuration = none_convert(minMovDuration), none_convert(maxMovDuration)
-        minMovReleaseDate, maxMovReleaseDate = none_convert(minMovReleaseDate), none_convert(maxMovReleaseDate)
-        minMovPlayDate, maxMovPlayDate = none_convert(minMovPlayDate), none_convert(maxMovPlayDate)
-        includeNotPlayed = none_convert(includeNotPlayed)
 
         if minMovDuration and maxMovDuration:
             if minMovDuration > maxMovDuration:
@@ -536,7 +532,6 @@ def customer_filter_mov():
         movName, comName, city, state = details['movName'], details['comName'], details['city'], details['state']
         minMovPlayDate, maxMovPlayDate = none_convert(details['minMovReleaseDate']), none_convert(details['maxMovReleaseDate'])
 
-        minMovPlayDate, maxMovPlayDate = none_convert(minMovPlayDate), none_convert(maxMovPlayDate)
         if minMovPlayDate and maxMovPlayDate:
             if parser.parse(minMovPlayDate) > parser.parse(maxMovPlayDate):
                 return make_response("Minimum play date must be before the maximum",400) 
