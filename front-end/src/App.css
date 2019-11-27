@@ -31,13 +31,24 @@
   justify-content: center;
 }
 
-.col-btn {
+.col-2-btn {
   display: grid;
-  justify-content: space-around;
-  align-content: center;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr;
   column-gap: 15px;
+  justify-content: center;
+  align-content: center;
+  justify-items: center;
+  align-items: center;
+}
+
+.grid-5-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr;
+  column-gap: 10px;
+  justify-content: center;
+  align-content: center;
   justify-items: center;
   align-items: center;
 }
