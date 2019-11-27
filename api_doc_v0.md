@@ -668,7 +668,7 @@ Failed to execute stored procedure: {}
 
 
 ### Screen 20.2: Get customer's cards
-@api {POST} '/get_customer_cards'
+@api {POST} '/screen20_get_all'
 
 @input example
 {
@@ -679,18 +679,29 @@ Failed to execute stored procedure: {}
 HTTP/1.1 200 OK
 [
   [
-    "1111111111110000"
+    "ALL",
+    "4400 The Movie",
+    "Avengers: Endgame",
+    "Calculus Returns: A ML Story",
+    "George P Burdell's Life Story",
+    "Georgia Tech The Movie",
+    "How to Train Your Dragon",
+    "Spaceballs",
+    "Spider-Man: Into the Spider-Verse",
+    "The First Pokemon Movie",
+    "The King's Speech"
   ],
   [
-    "1111111111111000"
+    "4400 Theater Company",
+    "AI Theater Company",
+    "Awesome Theater Company",
+    "EZ Theater Company"
   ],
   [
-    "1111111111111100"
-  ],
-  [
-    "1111111111111110"
-  ],
-  [
+    "1111111111110000",
+    "1111111111111000",
+    "1111111111111100",
+    "1111111111111110",
     "1111111111111111"
   ]
 ]
@@ -762,24 +773,30 @@ HTTP/1.1 500
 Failed to execute stored procedure: {}
 
 
-### Screen 22.1 User get theater names
-@api {GET} '/get_theater'
+### Screen 22.1 User get theater names and company names
+@api {GET} '/screen22_get_all'
 
 
 @success example
 HTTP/1.1 200 OK
 [
   [
-    "ALL"
-  ],
-  [
+    "ALL",
+    "Star Movies",
+    "Cinema Star",
+    "Main Movies",
+    "Jonathan's Movies",
+    "ML Movies",
+    "ABC Theater",
     "Star Movies"
   ],
   [
-    "Cinema Star"
+    "4400 Theater Company",
+    "AI Theater Company",
+    "Awesome Theater Company",
+    "EZ Theater Company"
   ]
 ]
-
 
 @error example
 HTTP/1.1 500 
