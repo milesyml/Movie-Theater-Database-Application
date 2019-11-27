@@ -7,8 +7,8 @@ app = Flask(__name__)
 
 #SQL Server Details Here
 connection = mysql.connector.connect(host="localhost",
-                                     user="root",
-                                     password="futiantian",
+                                     user="test",
+                                     password="password1234",
                                      database="team36")
 
 def none_convert(input):
@@ -75,10 +75,9 @@ def user_login():
                 cur.close()
                 return make_response('Login Failed', 400)
                 
-            #status, isCustomer, isAdmin, isManager = rv[0][1], rv[0][2], rv[0][3], rv[0][4]
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
-            return jsonify(items)
+            return items
         except mysql.connector.IntegrityError as error:
             cur.close()
             msg = "Input Error: {}".format(error)
@@ -408,6 +407,37 @@ def admin_view_comDetail_th():
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
             return jsonify(items)
+        except mysql.connector.IntegrityError as error:
+            cur.close()
+            msg = "Input Error: {}".format(error)
+            return make_response(msg, 400)
+        except mysql.connector.Error as error:
+            cur.close()
+            msg = "Failed to execute stored procedure: {}".format(error)
+            return make_response(msg, 500)
+
+#Screen 16 (Combine Theater and Employee)
+@app.route('/admin_view_comDetail_combined', methods=['POST'])
+def admin_view_comDetail_combined():
+    if request.method == "POST":
+        comName = request.json['comName']
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('admin_view_comDetail_emp', [comName])
+            cur.execute('select concat(empfirstname, " ", emplastname) from adcomdetailemp')
+            emp = cur.fetchall()
+            emp = [i[0] for i in emp]
+            cur.close()
+
+            cur = connection.cursor()
+            cur.callproc('admin_view_comDetail_th', [comName])
+            cur.execute("""SELECT thName, concat(firstname, ' ', lastname) as manName, thCity, thState, thCapacity FROM 
+                            team36.adcomdetailth inner join user on thManagerUsername = username; """)
+            rv = cur.fetchall()
+            items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
+            cur.close()
+            return jsonify(emp,items)
         except mysql.connector.IntegrityError as error:
             cur.close()
             msg = "Input Error: {}".format(error)

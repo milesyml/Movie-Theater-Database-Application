@@ -468,7 +468,6 @@ HTTP/1.1 200 OK
   }
 ]
 
-
 @error example
 HTTP/1.1 400 BAD REQUEST
 Input Error: {} [for integrity errors]
@@ -476,6 +475,56 @@ Input Error: {} [for integrity errors]
 HTTP/1.1 500 
 Failed to execute stored procedure: {}
 
+### Screen 16.3: Admin explore company detail: Both theaters and employees
+@api {POST} '/admin_view_comDetail_combined'
+
+@input example
+{
+	"comName": "4400 Theater Company"
+}
+
+@success example
+HTTP/1.1 200 OK
+[
+  [
+    "Claude Shannon",
+    "George P. Burdell",
+    "Manager One",
+    "Three Three",
+    "Four Four",
+    "Marie Curie"
+  ],
+  [
+    {
+      "manName": "Claude Shannon",
+      "thCapacity": 4,
+      "thCity": "San Francisco",
+      "thName": "Cinema Star",
+      "thState": "CA"
+    },
+    {
+      "manName": "George P. Burdell",
+      "thCapacity": 2,
+      "thCity": "Seattle",
+      "thName": "Jonathan's Movies",
+      "thState": "WA"
+    },
+    {
+      "manName": "Marie Curie",
+      "thCapacity": 5,
+      "thCity": "Boulder",
+      "thName": "Star Movies",
+      "thState": "CA"
+    }
+  ]
+]
+
+@error example
+HTTP/1.1 400 BAD REQUEST
+Input Error: {} [for integrity errors]
+
+HTTP/1.1 500 
+Failed to execute stored procedure: {}
 
 ### Screen 17: Admin create movie
 @api {POST} '/admin_create_mov'
