@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response
 import mysql.connector
 from mysql.connector import Error
 from dateutil import parser
@@ -278,7 +278,7 @@ def decline_user():
             return make_response(msg, 500)
 
 #Screen 14 (Admin Filter Company)
-#Untested & Logical Constraints not done?
+#Untested
 @app.route('/admin_filter_company', methods=['POST'])
 def admin_filter_company():
     if request.method == "POST":
@@ -287,6 +287,16 @@ def admin_filter_company():
         minTheater, maxTheater = none_convert(details['minTheater']), none_convert(details['maxTheater'])
         minEmployee, maxEmployee = none_convert(details['minEmployee']), none_convert(details['maxEmployee'])
         sortBy, sortDirection = details['sortBy'], details['sortDirection']
+
+        if minCity and maxCity:
+            if minCity > maxCity:
+                return make_response("Minimum number of cities must be less than the maximum",400) 
+        if minTheater and maxTheater:
+            if minTheater > maxTheater:
+                return make_response("Minimum number of theaters must be less than the maximum",400) 
+        if minEmployee and maxEmployee:
+            if minEmployee > maxEmployee:
+                return make_response("Minimum number of employees must be less than the maximum",400) 
 
         try:
             cur = connection.cursor()
@@ -430,7 +440,7 @@ def admin_create_mov():
             return make_response(msg, 500)
 
 #Screen 18 (Manager Filter Theater)
-#Untested & Logical Constraints not done?
+#Untested
 @app.route('/manager_filter_th', methods=['POST'])
 def manager_filter_th():
     if request.method == "POST":
@@ -440,6 +450,21 @@ def manager_filter_th():
         minMovReleaseDate, maxMovReleaseDate = none_convert(details['minMovReleaseDate']), none_convert(details['maxMovReleaseDate'])
         minMovPlayDate, maxMovPlayDate = none_convert(details['minMovPlayDate']), none_convert(details['maxMovPlayDate'])
         includeNotPlayed = details['includeNotPlayed']
+
+        minMovDuration, maxMovDuration = none_convert(minMovDuration), none_convert(maxMovDuration)
+        minMovReleaseDate, maxMovReleaseDate = none_convert(minMovReleaseDate), none_convert(maxMovReleaseDate)
+        minMovPlayDate, maxMovPlayDate = none_convert(minMovPlayDate), none_convert(maxMovPlayDate)
+        includeNotPlayed = none_convert(includeNotPlayed)
+
+        if minMovDuration and maxMovDuration:
+            if minMovDuration > maxMovDuration:
+                return make_response("Minimum movie duration must be less than the maximum",400)  
+        if minMovReleaseDate and maxMovReleaseDate:
+            if parser.parse(minMovReleaseDate) > parser.parse(maxMovReleaseDate):
+                return make_response("Minimum release date must be before the maximum",400)  
+        if minMovPlayDate and maxMovPlayDate:
+            if parser.parse(minMovPlayDate) > parser.parse(maxMovPlayDate):
+                return make_response("Minimum play date must be before the maximum",400)  
 
         try:
             cur = connection.cursor()
@@ -460,7 +485,6 @@ def manager_filter_th():
             return make_response(msg, 500)  
 
 #Screen 19 (Manager Schedule Movie)
-#Untested
 @app.route('/manager_schedule_mov', methods=['POST'])
 def manager_schedule_mov():
     if request.method == "POST":
@@ -511,6 +535,11 @@ def customer_filter_mov():
         details = request.json
         movName, comName, city, state = details['movName'], details['comName'], details['city'], details['state']
         minMovPlayDate, maxMovPlayDate = none_convert(details['minMovReleaseDate']), none_convert(details['maxMovReleaseDate'])
+
+        minMovPlayDate, maxMovPlayDate = none_convert(minMovPlayDate), none_convert(maxMovPlayDate)
+        if minMovPlayDate and maxMovPlayDate:
+            if parser.parse(minMovPlayDate) > parser.parse(maxMovPlayDate):
+                return make_response("Minimum play date must be before the maximum",400) 
 
         try:
             cur = connection.cursor()
