@@ -370,52 +370,6 @@ def admin_create_theater():
             msg = "Failed to execute stored procedure: {}".format(error)
             return make_response(msg, 500)
 
-#Screen 16 (Company Detail for Employee)
-@app.route('/admin_view_comDetail_emp', methods=['POST'])
-def admin_view_comDetail_emp():
-    if request.method == "POST":
-        comName = request.json['comName']
-
-        try:
-            cur = connection.cursor()
-            cur.callproc('admin_view_comDetail_emp', [comName])
-            cur.execute('select concat(empfirstname, " ", emplastname) from adcomdetailemp')
-            rv = cur.fetchall()
-            cur.close()
-            return jsonify(rv)
-        except mysql.connector.IntegrityError as error:
-            cur.close()
-            msg = "Input Error: {}".format(error)
-            return make_response(msg, 400)
-        except mysql.connector.Error as error:
-            cur.close()
-            msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
-
-#Screen 16 (Company Detail for Theater)
-@app.route('/admin_view_comDetail_th', methods=['POST'])
-def admin_view_comDetail_th():
-    if request.method == "POST":
-        comName = request.json['comName']
-
-        try:
-            cur = connection.cursor()
-            cur.callproc('admin_view_comDetail_th', [comName])
-            cur.execute("""SELECT thName, concat(firstname, ' ', lastname) as manName, thCity, thState, thCapacity FROM 
-                            team36.adcomdetailth inner join user on thManagerUsername = username; """)
-            rv = cur.fetchall()
-            items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
-            cur.close()
-            return jsonify(items)
-        except mysql.connector.IntegrityError as error:
-            cur.close()
-            msg = "Input Error: {}".format(error)
-            return make_response(msg, 400)
-        except mysql.connector.Error as error:
-            cur.close()
-            msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
-
 #Screen 16 (Combine Theater and Employee)
 @app.route('/admin_view_comDetail_combined', methods=['POST'])
 def admin_view_comDetail_combined():
@@ -536,19 +490,33 @@ def manager_schedule_mov():
             msg = "Failed to execute stored procedure: {}".format(error)
             return make_response(msg, 500)
 
-#Screen 20 (Get Customer's Cards)
-@app.route('/get_customer_cards', methods=['POST'])
-def get_customer_cards():
+#Screen 20 (Get Movie Names, Company Names and Customer's Cards)
+@app.route('/screen20_get_all', methods=['POST'])
+def screen20_get_all():
     try:
         if request.method == "POST":
             details = request.json
             user = details['userName']
 
             cur = connection.cursor()
-            cur.execute("SELECT creditcardnumber FROM creditcard where username = '{}'".format(user))
-            rv = cur.fetchall()
+            cur.execute('SELECT name FROM movie')
+            movies = cur.fetchall()
+            movies = [i[0] for i in movies]
+            movies.insert(0,'ALL')
+            cur.close()            
+
+            cur = connection.cursor()
+            cur.execute('SELECT name FROM company')
+            companies = cur.fetchall()
+            companies = [i[0] for i in companies]
             cur.close()
-            return jsonify(rv)
+
+            cur = connection.cursor()
+            cur.execute("SELECT creditcardnumber FROM creditcard where username = '{}'".format(user))
+            cards = cur.fetchall()
+            cards = [i[0] for i in cards]
+            cur.close()
+            return jsonify(movies, companies, cards)
     except mysql.connector.Error as error:
         msg = "Error occured: {}".format(error)
         return make_response(msg, 500)
@@ -639,17 +607,25 @@ def customer_view_history():
             msg = "Failed to execute stored procedure: {}".format(error)
             return make_response(msg, 500)
 
-#Screen 22 (Get Theater Names)
-@app.route('/get_theater', methods=['GET'])
-def get_theater():
+#Screen 22 (Get Theater Names and Company Names)
+@app.route('/screen22_get_all', methods=['GET'])
+def screen22_get_all():
     try:
         if request.method == "GET":
             cur = connection.cursor()
             cur.execute('SELECT name FROM theater')
-            rv = cur.fetchall()
-            rv.insert(0,['ALL'])
+            theater = cur.fetchall()
+            theater = [i[0] for i in theater]
+            theater.insert(0,'ALL')
             cur.close()
-            return jsonify(rv)
+
+            cur = connection.cursor()
+            cur.execute('SELECT name FROM company')
+            companies = cur.fetchall()
+            companies = [i[0] for i in companies]
+            cur.close()
+
+            return jsonify(theater, companies)
     except mysql.connector.Error as error:
         cur.close()
         msg = "Error occured: {}".format(error)
