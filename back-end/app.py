@@ -7,8 +7,8 @@ app = Flask(__name__)
 
 #SQL Server Details Here
 connection = mysql.connector.connect(host="localhost",
-                                     user="test",
-                                     password="password1234",
+                                     user="root",
+                                     password="futiantian",
                                      database="team36")
 
 def none_convert(input):
@@ -78,7 +78,7 @@ def user_login():
             #status, isCustomer, isAdmin, isManager = rv[0][1], rv[0][2], rv[0][3], rv[0][4]
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
-            return items
+            return jsonify(items)
         except mysql.connector.IntegrityError as error:
             cur.close()
             msg = "Input Error: {}".format(error)
@@ -283,9 +283,9 @@ def decline_user():
 def admin_filter_company():
     if request.method == "POST":
         details = request.json
-        comName, minCity, maxCity = details['comName'], details['minCity'], details['maxCity']
-        minTheater, maxTheater = details['minTheater'], details['maxTheater']
-        minEmployee, maxEmployee = details['minEmployee'], details['maxEmployee']
+        comName, minCity, maxCity = details['comName'], none_convert(details['minCity']), none_convert(details['maxCity'])
+        minTheater, maxTheater = none_convert(details['minTheater']), none_convert(details['maxTheater'])
+        minEmployee, maxEmployee = none_convert(details['minEmployee']), none_convert(details['maxEmployee'])
         sortBy, sortDirection = details['sortBy'], details['sortDirection']
 
         try:
@@ -436,9 +436,9 @@ def manager_filter_th():
     if request.method == "POST":
         details = request.json
         manUsername, movName = details['manUsername'], details['movName']
-        minMovDuration, maxMovDuration = details['minMovDuration'], details['maxMovDuration']
-        minMovReleaseDate, maxMovReleaseDate = details['minMovReleaseDate'], details['maxMovReleaseDate']
-        minMovPlayDate, maxMovPlayDate = details['minMovReleaseDate'], details['maxMovReleaseDate']
+        minMovDuration, maxMovDuration = none_convert(details['minMovDuration']), none_convert(details['maxMovDuration'])
+        minMovReleaseDate, maxMovReleaseDate = none_convert(details['minMovReleaseDate']), none_convert(details['maxMovReleaseDate'])
+        minMovPlayDate, maxMovPlayDate = none_convert(details['minMovPlayDate']), none_convert(details['maxMovPlayDate'])
         includeNotPlayed = details['includeNotPlayed']
 
         try:
@@ -510,7 +510,7 @@ def customer_filter_mov():
     if request.method == "POST":
         details = request.json
         movName, comName, city, state = details['movName'], details['comName'], details['city'], details['state']
-        minMovPlayDate, maxMovPlayDate = details['minMovReleaseDate'], details['maxMovReleaseDate']
+        minMovPlayDate, maxMovPlayDate = none_convert(details['minMovReleaseDate']), none_convert(details['maxMovReleaseDate'])
 
         try:
             cur = connection.cursor()

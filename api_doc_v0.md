@@ -72,8 +72,8 @@ Error occured: {error message}
 
 @input example
 {
-	"user": "calcwizard",
-	"pw":"22222222"
+	"userName": "calcwizard",
+	"password":"222222222"
 }
 
 @success example
@@ -100,10 +100,10 @@ HTTP/1.1 500
 
 @input example
 {
-	"user": "lanshang",
-	"pw":"222222223",
-	"first": "tiantian",
-	"last": "fu"
+	"userName": "lanshang",
+	"password":"222222223",
+	"firstName": "tiantian",
+	"lastName": "fu"
 }
 
 @success example
@@ -124,10 +124,10 @@ HTTP/1.1 500
 
 @input example
 {
-	"user": "lanshang2",
-	"pw":"222222223",
-	"first": "tiantian",
-	"last": "fu"
+	"userName": "lanshang2",
+	"password":"222222223",
+	"firstName": "tiantian",
+	"lastName": "fu"
 }
 
 @success example
@@ -147,7 +147,7 @@ HTTP/1.1 500
 
 @input example
 {
-	"user": "lanshang2",
+	"userName": "lanshang2",
 	"cards": ["7643278923432678", "7643278923432645"]
 }
 
@@ -168,10 +168,10 @@ HTTP/1.1 500
 
 @input example
 {
-	"user": "lanshang3",
-	"pw": "fasfdsgfdsgfd",
-	"first": "tiantian",
-	"last": "fu",
+	"userName": "lanshang3",
+	"password": "fasfdsgfdsgfd",
+	"firstName": "tiantian",
+	"lastName": "fu",
 	"comName": "4400 Theater Company",
 	"street": "800",
 	"city": "Atlanta",
@@ -196,10 +196,10 @@ HTTP/1.1 500
 
 @input example
 {
-	"user": "lanshang3",
-	"pw": "fasfdsgfdsgfd",
-	"first": "tiantian",
-	"last": "fu",
+	"userName": "lanshang3",
+	"password": "fasfdsgfdsgfd",
+	"firstName": "tiantian",
+	"lastName": "fu",
 	"comName": "4400 Theater Company",
 	"street": "800",
 	"city": "Atlanta",
@@ -221,13 +221,52 @@ HTTP/1.1 500
 
 
 ### Screen 13.1: Admin filter user
+@api {POST} '/admin_filter_user'
+
+@input example
+{
+	"userName": "",
+	"status": "ALL",
+	"sortBy": "creditCardCount",
+	"sortDirection": "DESC"
+}
+
+@Note:
+-- sortBy can only be one of them: "", "username", "creditCardCount", "userType", "status", default is "username"
+-- sortDirection can only be: "ASC", "DESC", "", default is "DESC"
+
+@success example
+HTTP/1.1 200 OK
+[
+  {
+    "creditCardCount": 5,
+    "status": "approved",
+    "userType": "CustomerManager",
+    "username": "georgep"
+  },
+  {
+    "creditCardCount": 3,
+    "status": "approved",
+    "userType": "Customer",
+    "username": "ilikemoney$$"
+  }
+]
+
+
+@error example
+HTTP/1.1 400 BAD REQUEST
+Input Error: {} [for integrity errors]
+
+HTTP/1.1 500 
+Failed to execute stored procedure: {}
+
 
 ### Screen 13.2: Admin approve user
 @api {POST} '/admin_approve_user'
 
 @input example
 {
-	"user": "smith_j"
+	"userName": "smith_j"
 }
 
 @success example
@@ -249,7 +288,7 @@ Failed to execute stored procedure: {}
 
 @input example
 {
-	"user": "smith_j"
+	"userName": "smith_j"
 }
 
 @success example
@@ -267,9 +306,78 @@ Failed to execute stored procedure: {}
 
 
 ### Screen 14: Admin filter company 
+@api {POST} '/admin_filter_company'
+
+@input example
+{
+	"comName": "ALL",
+	"minCity": "",
+	"maxCity": "",
+	"minTheater": "",
+	"maxTheater": "",
+	"minEmployee": "",
+	"maxEmployee": "",
+	"sortBy": "",
+	"sortDirection": "ASC"
+}
+
+@Note:
+- sortBy can only be one of the following: "comName", "numCityCover", "numEmployee", "numTheater", ""
 
 
-### Screen 15: Admin create theater
+@success example
+HTTP/1.1 200 OK
+[
+  {
+    "comName": "4400 Theater Company",
+    "numCityCover": 3,
+    "numEmployee": 6,
+    "numTheater": 3
+  },
+  {
+    "comName": "AI Theater Company",
+    "numCityCover": 1,
+    "numEmployee": 2,
+    "numTheater": 1
+  }
+]
+
+@error example
+HTTP/1.1 400 BAD REQUEST
+Input Error: {} [for integrity errors]
+
+HTTP/1.1 500 
+Failed to execute stored procedure: {}
+
+### Screen 15.1: Get eligible managers
+@api {POST} '/get_eligible_managers'
+
+@input example
+{
+	"comName": "4400 Theater Company"
+}
+
+@success example
+HTTP/1.1 200 OK
+[
+  [
+    "Manager One"
+  ],
+  [
+    "Three Three"
+  ],
+  [
+    "Four Four"
+  ]
+]
+
+
+@error example
+HTTP/1.1 400 BAD REQUEST
+Error occured: {}
+
+
+### Screen 15.2: Admin create theater
 @api {POST} '/admin_create_theater'
 
 @input example
@@ -295,6 +403,7 @@ Input Error: {} [for integrity errors]
 
 HTTP/1.1 500 
 Failed to execute stored procedure: {}
+
 
 ### Screen 16.1: Admin explore company detail: the employees working in that company
 @api {POST} '/admin_view_comDetail_emp'
@@ -375,7 +484,7 @@ Failed to execute stored procedure: {}
 {
 	"name": "4400 Theater Company Exploration",
 	"duration": 120,
-	"date": "2019-11-26"
+	"releaseDate": "2019-11-26"
 }
 
 @success example
@@ -390,7 +499,50 @@ Input Error: {} [for integrity errors]
 HTTP/1.1 500 
 Failed to execute stored procedure: {}
 
+
+
 ### Screen 18: Manager theater overview
+@api {POST} '/manager_filter_th'
+
+@input example
+{
+	"manUsername": "fatherAI",
+	"movName": "",
+	"minMovDuration": "",
+	"maxMovDuration": "",
+	"minMovReleaseDate": "",
+	"maxMovReleaseDate": "",
+	"minMovPlayDate": "",
+	"maxMovPlayDate": "",
+	"includeNotPlayed": 1
+}
+@Note：
+- for "includeNotPlayed", 1 means true (checked), 0 means false (not checked)
+
+@success example
+HTTP/1.1 200 OK
+[
+  {
+    "movDuration": 130,
+    "movName": "4400 The Movie",
+    "movPlayDate": null,
+    "movReleaseDate": "Mon, 12 Aug 2019 00:00:00 GMT"
+  },
+  {
+    "movDuration": 120,
+    "movName": "4400 Theater Company Exploration",
+    "movPlayDate": null,
+    "movReleaseDate": "Tue, 26 Nov 2019 00:00:00 GMT"
+  }
+]
+
+
+@error example
+HTTP/1.1 400 BAD REQUEST
+Input Error: {} [for integrity errors]
+
+HTTP/1.1 500 
+Failed to execute stored procedure: {}
 
 
 ### Screen 19: Manager schedule movie
@@ -418,10 +570,92 @@ Failed to execute stored procedure: {}
 
 
 ### Screen 20.1: Customer explore movie
+@api {POST} '/customer_filter_mov'
+
+@input example
+{
+	"movName": "ALL",
+	"comName": "ALL",
+	"city": "",
+	"state": "ALL",
+	"minMovReleaseDate": "",
+	"maxMovReleaseDate": ""
+}
+
+@success example
+HTTP/1.1 200 OK
+[
+  {
+    "comName": "4400 Theater Company",
+    "movName": "4400 The Movie",
+    "movPlayDate": "Thu, 12 Sep 2019 00:00:00 GMT",
+    "movReleaseDate": "Mon, 12 Aug 2019 00:00:00 GMT",
+    "thCity": "San Francisco",
+    "thName": "Cinema Star",
+    "thState": "CA",
+    "thStreet": "100 Cool Place",
+    "thZipcode": "94016"
+  },
+  {
+    "comName": "Awesome Theater Company",
+    "movName": "4400 The Movie",
+    "movPlayDate": "Sat, 12 Oct 2019 00:00:00 GMT",
+    "movReleaseDate": "Mon, 12 Aug 2019 00:00:00 GMT",
+    "thCity": "Austin",
+    "thName": "ABC Theater",
+    "thState": "TX",
+    "thStreet": "880 Color Dr",
+    "thZipcode": "73301"
+  }
+]
+
+@error example
+HTTP/1.1 400 BAD REQUEST
+Input Error: {} [for integrity errors]
+
+HTTP/1.1 500 
+Failed to execute stored procedure: {}
 
 
 
-### Screen 20.2: Customer view movie
+### Screen 20.2: Get customer's cards
+@api {POST} '/get_customer_cards'
+
+@input example
+{
+	"userName": "georgep"
+}
+
+@success example
+HTTP/1.1 200 OK
+[
+  [
+    "1111111111110000"
+  ],
+  [
+    "1111111111111000"
+  ],
+  [
+    "1111111111111100"
+  ],
+  [
+    "1111111111111110"
+  ],
+  [
+    "1111111111111111"
+  ]
+]
+
+
+@error example
+HTTP/1.1 400 BAD REQUEST
+Input Error: {} [for integrity errors]
+
+HTTP/1.1 500 
+Failed to execute stored procedure: {}
+
+
+### Screen 20.3: Customer view movie
 @api {POST} '/customer_view_movie'
 
 @input example
@@ -441,6 +675,9 @@ Viewing Added
 
 @error example
 HTTP/1.1 400 BAD REQUEST
+Viewing more than 3 movies a day is not permitted
+
+HTTP/1.1 400 BAD REQUEST
 Input Error: {} [for integrity errors]
 
 HTTP/1.1 500 
@@ -451,7 +688,7 @@ Failed to execute stored procedure: {}
 
 @input example
 {
-	"user": "calcultron2"
+	"userName": "calcultron2"
 }
 
 @success example
@@ -499,6 +736,7 @@ HTTP/1.1 200 OK
 HTTP/1.1 500 
 Failed to execute stored procedure: {}
 
+
 ### Screen 22.2 User filter theater
 @api {POST} '/user_filter_th'
 
@@ -514,28 +752,19 @@ Failed to execute stored procedure: {}
 HTTP/1.1 200 OK
 [
   {
-    "comName": "4400 Theater Company",
-    "thCity": "San Francisco",
-    "thName": "Cinema Star",
-    "thState": "CA",
-    "thStreet": "100 Cool Place",
-    "thZipcode": "94016"
+    "address": "100 Cool Place, San Francisco, CA 94016",
+    "company": "4400 Theater Company",
+    "theater": "Cinema Star"
   },
   {
-    "comName": "4400 Theater Company",
-    "thCity": "Seattle",
-    "thName": "Jonathan's Movies",
-    "thState": "WA",
-    "thStreet": "67 Pearl Dr",
-    "thZipcode": "98101"
+    "address": "67 Pearl Dr, Seattle, WA 98101",
+    "company": "4400 Theater Company",
+    "theater": "Jonathan's Movies"
   },
   {
-    "comName": "4400 Theater Company",
-    "thCity": "Atlanta",
-    "thName": "Overload Cinema",
-    "thState": "GA",
-    "thStreet": "1 Main Street",
-    "thZipcode": "30332"
+    "address": "4400 Rocks Ave, Boulder, CA 80301",
+    "company": "4400 Theater Company",
+    "theater": "Star Movies"
   }
 ]
 
@@ -556,7 +785,7 @@ Failed to execute stored procedure: {}
 	"thName": "Cinema Star",
 	"comName": "4400 Theater Company",
 	"date": "2019-11-21",
-	"user": "DNAhelix"
+	"userName": "DNAhelix"
 }
 
 @success example
@@ -577,24 +806,32 @@ Failed to execute stored procedure: {}
 
 @input example
 {
-	"user": "calcwizard",
-	"minDate": "2010-01-01",
-	"maxDate": "2020-01-01"
+	"userName": "calcwizard",
+	"minDate": "",
+	"maxDate": ""
 }
 
--- Note: How to deal with situations like minDate is empty(NULL)??
 
 @success example
 HTTP/1.1 200 OK
 [
   {
-    "comName": "4400 Theater Company",
-    "thCity": "San Francisco",
-    "thName": "Cinema Star",
-    "thState": "CA",
-    "thStreet": "100 Cool Place",
-    "thZipcode": "94016",
-    "visitDate": "Thu, 21 Nov 2019 00:00:00 GMT"
+    "address": "123 Main St, New York, NY 10001",
+    "company": "EZ Theater Company",
+    "theater": "Main Movies",
+    "visitDate": "Mon, 22 Mar 2010 00:00:00 GMT"
+  },
+  {
+    "address": "745 GT St, Atlanta, GA 30332",
+    "company": "EZ Theater Company",
+    "theater": "Star Movies",
+    "visitDate": "Thu, 25 Mar 2010 00:00:00 GMT"
+  },
+  {
+    "address": "314 Pi St, Pallet Town, KS 31415",
+    "company": "AI Theater Company",
+    "theater": "ML Movies",
+    "visitDate": "Sat, 20 Mar 2010 00:00:00 GMT"
   }
 ]
 
