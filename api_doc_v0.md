@@ -78,15 +78,13 @@ Error occured: {error message}
 
 @success example
 HTTP/1.1 200 OK
-[
-  {
+{
     "isAdmin": 0,
     "isCustomer": 1,
     "isManager": 0,
     "status": "approved",
     "username": "calcwizard"
   }
-]
 
 @error example
 HTTP/1.1 400 BAD REQUEST
