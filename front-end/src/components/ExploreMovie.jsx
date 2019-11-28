@@ -346,9 +346,12 @@ class ExploreMovie extends Component {
           <div className="alert alert-danger">No card selected</div>
         )}
         <div>
-          <Link to="/managerOnlyFunctionality">
-            <button className="btn btn-primary m-2">Back</button>
-          </Link>
+          <button
+            className="btn btn-primary m-2"
+            onClick={this.props.history.goBack}
+          >
+            Back
+          </button>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <label htmlFor="card">Card Number</label>
           &nbsp;
