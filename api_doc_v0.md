@@ -873,7 +873,8 @@ Failed to execute stored procedure: {}
 {
 	"userName": "calcwizard",
 	"minDate": "",
-	"maxDate": ""
+	"maxDate": "",
+	"comName": "EZ Theater Company"
 }
 
 
@@ -891,12 +892,6 @@ HTTP/1.1 200 OK
     "company": "EZ Theater Company",
     "theater": "Star Movies",
     "visitDate": "Thu, 25 Mar 2010 00:00:00 GMT"
-  },
-  {
-    "address": "314 Pi St, Pallet Town, KS 31415",
-    "company": "AI Theater Company",
-    "theater": "ML Movies",
-    "visitDate": "Sat, 20 Mar 2010 00:00:00 GMT"
   }
 ]
 

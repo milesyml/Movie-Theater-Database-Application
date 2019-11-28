@@ -682,7 +682,7 @@ def user_visit_th():
 def user_filter_visitHistory():
     if request.method == "POST":
         details = request.json
-        user, minDate, maxDate = details['userName'], details['minDate'], details['maxDate']
+        user, minDate, maxDate, comName = details['userName'], details['minDate'], details['maxDate'], details['comName']
         minDate = none_convert(minDate)
         maxDate = none_convert(maxDate)
 
@@ -692,7 +692,10 @@ def user_filter_visitHistory():
         try:
             cur = connection.cursor()
             cur.callproc('user_filter_visitHistory', [user, minDate, maxDate])
-            cur.execute("select thName as theater, concat(thStreet,', ',thCity,', ',thState,' ',thZipcode) as address, comName as company, visitDate from uservisithistory")
+            if comName == 'ALL':
+                cur.execute("select thName as theater, concat(thStreet,', ',thCity,', ',thState,' ',thZipcode) as address, comName as company, visitDate from uservisithistory")
+            else:    
+                cur.execute("select thName as theater, concat(thStreet,', ',thCity,', ',thState,' ',thZipcode) as address, comName as company, visitDate from uservisithistory where comName = '{}'".format(comName))
             rv = cur.fetchall()
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
