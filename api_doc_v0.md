@@ -627,8 +627,8 @@ Failed to execute stored procedure: {}
 	"comName": "ALL",
 	"city": "",
 	"state": "ALL",
-	"minMovReleaseDate": "",
-	"maxMovReleaseDate": ""
+	"minMovPlayDate": "",
+	"maxMovPlayDate": ""
 }
 
 @success example

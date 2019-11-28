@@ -502,7 +502,6 @@ def screen20_get_all():
             cur.execute('SELECT name FROM movie')
             movies = cur.fetchall()
             movies = [i[0] for i in movies]
-            movies.insert(0,'ALL')
             cur.close()            
 
             cur = connection.cursor()
@@ -528,7 +527,7 @@ def customer_filter_mov():
     if request.method == "POST":
         details = request.json
         movName, comName, city, state = details['movName'], details['comName'], details['city'], details['state']
-        minMovPlayDate, maxMovPlayDate = none_convert(details['minMovReleaseDate']), none_convert(details['maxMovReleaseDate'])
+        minMovPlayDate, maxMovPlayDate = none_convert(details['minMovPlayDate']), none_convert(details['maxMovPlayDate'])
 
         if minMovPlayDate and maxMovPlayDate:
             if parser.parse(minMovPlayDate) > parser.parse(maxMovPlayDate):
