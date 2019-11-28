@@ -745,18 +745,39 @@ Failed to execute stored procedure: {}
 
 @input example
 {
-	"userName": "calcultron2"
+	"userName": "georgep"
 }
 
 @success example
 HTTP/1.1 200 OK
 [
   {
+    "comName": "EZ Theater Company",
+    "creditCardNum": "1111111111111100",
+    "movName": "How to Train Your Dragon",
+    "movPlayDate": "Thu, 25 Mar 2010 00:00:00 GMT",
+    "thName": "Star Movies"
+  },
+  {
     "comName": "4400 Theater Company",
-    "creditCardNum": "1111111100000000",
-    "movName": "4400 The Movie",
-    "movPlayDate": "Tue, 26 Nov 2019 00:00:00 GMT",
-    "thName": "Theater 1"
+    "creditCardNum": "1111111111111111",
+    "movName": "How to Train Your Dragon",
+    "movPlayDate": "Fri, 02 Apr 2010 00:00:00 GMT",
+    "thName": "Cinema Star"
+  },
+  {
+    "comName": "EZ Theater Company",
+    "creditCardNum": "1111111111111111",
+    "movName": "How to Train Your Dragon",
+    "movPlayDate": "Mon, 22 Mar 2010 00:00:00 GMT",
+    "thName": "Main Movies"
+  },
+  {
+    "comName": "EZ Theater Company",
+    "creditCardNum": "1111111111111111",
+    "movName": "How to Train Your Dragon",
+    "movPlayDate": "Tue, 23 Mar 2010 00:00:00 GMT",
+    "thName": "Main Movies"
   }
 ]
 
