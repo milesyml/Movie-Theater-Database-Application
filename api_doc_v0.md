@@ -667,7 +667,7 @@ Failed to execute stored procedure: {}
 
 
 
-### Screen 20.2: Get customer's cards
+### Screen 20.2: Get Movie Names, Company Names and Customer's Cards
 @api {POST} '/screen20_get_all'
 
 @input example
@@ -679,7 +679,6 @@ Failed to execute stored procedure: {}
 HTTP/1.1 200 OK
 [
   [
-    "ALL",
     "4400 The Movie",
     "Avengers: Endgame",
     "Calculus Returns: A ML Story",
