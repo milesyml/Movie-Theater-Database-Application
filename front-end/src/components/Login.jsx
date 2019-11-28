@@ -8,10 +8,6 @@ class Login extends Component {
   state = {
     username: "",
     password: "",
-    users: [
-      ["morris", "morris"],
-      ["dominic", "dominic"]
-    ],
     isCorrect: true
   };
 
@@ -27,20 +23,7 @@ class Login extends Component {
     console.log(this.state);
   };
 
-  validation = () => {
-    for (var i = 0; i < this.state.users.length; i++) {
-      if (
-        this.state.users[i][0] == this.state.username &&
-        this.state.users[i][1] == this.state.password
-      ) {
-        return true;
-      }
-    }
-    return false;
-  };
-
   checkingSubmit = () => {
-    // if (this.validation()) {
     return (
       <Link to={"/adminOnlyFunctionality"}>
         <button type="submit" className="btn btn-secondary lighten-1 z-depth-0">
@@ -48,17 +31,6 @@ class Login extends Component {
         </button>
       </Link>
     );
-    // } else {
-    //   return (
-    //     <button
-    //       type="submit"
-    //       className="btn btn-secondary lighten-1 z-depth-0"
-    //       onClick={this.handleErrorInput}
-    //     >
-    //       Login
-    //     </button>
-    //   );
-    // }
   };
 
   handleErrorInput = () => {
