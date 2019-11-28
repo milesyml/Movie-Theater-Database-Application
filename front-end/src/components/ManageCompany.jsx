@@ -116,9 +116,9 @@ class ManageCompany extends Component {
       return;
     }
 
-    this.props.history.push(
-      `/companyDetail/${this.state.selected.companyName}`
-    );
+    console.log(this.state.selected.comName);
+
+    this.props.history.push(`/companyDetail/${this.state.selected.comName}`);
   };
 
   sortData = sortingKey => {

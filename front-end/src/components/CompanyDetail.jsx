@@ -5,64 +5,8 @@ class CompanyDetail extends Component {
   state = {
     companyName: "",
     data: [],
-    employeeNames: [
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi",
-      "hi"
-    ]
+    employeeNames: [],
+    error: null
   };
 
   stickyHeader = {
@@ -73,6 +17,33 @@ class CompanyDetail extends Component {
   constructor(props) {
     super(props);
     this.state.companyName = this.props.match.params.companyName;
+  }
+
+  componentDidMount() {
+    fetch("http://localhost:5000/admin_view_comDetail_combined", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        comName: this.state.companyName
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.json();
+        }
+      })
+      .then(data => this.setState({ data: data[1], employeeNames: data[0] }))
+      .catch(err => {
+        if (err.message === "400") {
+          this.props.history.push("/");
+        } else {
+          this.setState({ error: "Internal Server Error." });
+        }
+      });
   }
 
   renderEmployees = () => {
@@ -87,14 +58,14 @@ class CompanyDetail extends Component {
 
   renderData = () => {
     return this.state.data.map((theater, index) => {
-      const { theaterName, manager, city, state, capacity } = theater;
+      const { thName, manName, thCity, thState, thCapacity } = theater;
       return (
         <tr key={index}>
-          <td>{theaterName}</td>
-          <td>{manager}</td>
-          <td>{city}</td>
-          <td>{state}</td>
-          <td>{capacity}</td>
+          <td>{thName}</td>
+          <td>{manName}</td>
+          <td>{thCity}</td>
+          <td>{thState}</td>
+          <td>{thCapacity}</td>
         </tr>
       );
     });
@@ -112,6 +83,10 @@ class CompanyDetail extends Component {
             <div className="list-of-string">{this.renderEmployees()}</div>
           </div>
         </div>
+
+        {this.state.error && (
+          <div className="alert alert-danger">{this.state.error}</div>
+        )}
 
         <div style={{ height: 400, overflow: "auto" }}>
           <table
