@@ -7,8 +7,8 @@ app = Flask(__name__)
 
 #SQL Server Details Here
 connection = mysql.connector.connect(host="localhost",
-                                     user="test",
-                                     password="password1234",
+                                     user="root",
+                                     password="",
                                      database="team36")
 
 def none_convert(input):

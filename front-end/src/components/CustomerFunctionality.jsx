@@ -1,26 +1,20 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 
-class AdminOnlyFunctionality extends Component {
+class CustomerFunctionality extends Component {
   render() {
     return (
       <div className="center-div">
-        <h1>Admin-Only Functionality</h1>
+        <h1>Customer Functionality</h1>
         <div className="grid-2-col-3-row-btn">
-          <Link to="/manageUser" style={{ width: "100%" }}>
+          <Link to="/exploreMovie" style={{ width: "100%" }}>
             <button className="btn btn-primary m-1 btn-block">
-              Manage User
+              Explore Movie
             </button>
           </Link>
-          <Link to="/manageCompany" style={{ width: "100%" }}>
+          <Link to="/viewHistory" style={{ width: "100%" }}>
             <button className="btn btn-primary m-1 btn-block">
-              Manage Company
-            </button>
-          </Link>
-
-          <Link to="/createMovie" style={{ width: "100%" }}>
-            <button className="btn btn-primary m-1 btn-block">
-              Create Movie
+              View History
             </button>
           </Link>
 
@@ -36,7 +30,7 @@ class AdminOnlyFunctionality extends Component {
             </button>
           </Link>
 
-          <Link to="/" style={{ width: "100%" }}>
+          <Link to="/" className="item-span-2-cols" style={{ width: "100%" }}>
             <button className="btn btn-primary m-1 btn-block">Back</button>
           </Link>
         </div>
@@ -45,4 +39,4 @@ class AdminOnlyFunctionality extends Component {
   }
 }
 
-export default AdminOnlyFunctionality;
+export default CustomerFunctionality;
