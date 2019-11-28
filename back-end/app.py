@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify, make_response
+from flask_cors import CORS
 import mysql.connector
 from mysql.connector import Error
 from dateutil import parser
 
 app = Flask(__name__)
+CORS(app)
 
 #SQL Server Details Here
 connection = mysql.connector.connect(host="localhost",
@@ -63,7 +65,8 @@ def get_movies():
 def user_login():
     if request.method == "POST":
         details = request.json
-        user, pw = details['userName'], details['password']
+        user, pw = details['username'], details['password']
+
 
         try:
             cur = connection.cursor()
@@ -77,7 +80,7 @@ def user_login():
                 
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
-            return items
+            return items[0]
         except mysql.connector.IntegrityError as error:
             cur.close()
             msg = "Input Error: {}".format(error)
