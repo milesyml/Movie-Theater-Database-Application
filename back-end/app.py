@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify, make_response
+from flask_cors import CORS
 import mysql.connector
 from mysql.connector import Error
 from dateutil import parser
 
 app = Flask(__name__)
+CORS(app)
 
 #SQL Server Details Here
 connection = mysql.connector.connect(host="localhost",
@@ -63,7 +65,8 @@ def get_movies():
 def user_login():
     if request.method == "POST":
         details = request.json
-        user, pw = details['userName'], details['password']
+        user, pw = details['username'], details['password']
+
 
         try:
             cur = connection.cursor()
