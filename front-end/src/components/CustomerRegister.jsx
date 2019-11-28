@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { Form, Button, ButtonToolbar } from "react-bootstrap";
 import CreditCardList from "./CreditCardList";
+import Validation from "./Validation";
 
 class CustomerRegistration extends Component {
   state = {
@@ -12,7 +13,10 @@ class CustomerRegistration extends Component {
     confirmPassword: "",
     my_list: [],
     max_number: 5,
-    tempCardNumber: ""
+    tempCardNumber: "",
+    validPassword: true,
+    samePassword: true,
+    validCreditCard: true
   };
 
   handleChange = e => {
@@ -26,12 +30,26 @@ class CustomerRegistration extends Component {
     console.log("Submit");
     e.preventDefault();
     console.log(this.state);
+    this.setState({
+      validPassword: Validation.isPassword(this.state.password),
+      samePassword: Validation.isSame(
+        this.state.password,
+        this.state.confirmPassword
+      )
+    });
   };
   handleAddCard = () => {
     if (this.state.my_list.length < this.state.max_number) {
       if (this.state.tempCardNumber != "") {
         var new_list = this.state.my_list;
+        this.setState({
+          validCreditCard: Validation.isCreditCard(this.state.tempCardNumber)
+        });
+        if (!Validation.isCreditCard(this.state.tempCardNumber)) {
+          return;
+        }
         new_list.push(this.state.tempCardNumber);
+
         this.setState({ my_list: new_list });
       }
       console.log(this.state.my_list);
@@ -127,6 +145,9 @@ class CustomerRegistration extends Component {
               Register
             </Button>
           </div>
+          {!this.state.validPassword && <p>Incorrect password input</p>}
+          {!this.state.samePassword && <p>Password doesn't match</p>}
+          {!this.state.validCreditCard && <p>Invalid creditcard</p>}
         </Form>
       </div>
     );

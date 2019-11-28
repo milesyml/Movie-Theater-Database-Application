@@ -10,6 +10,9 @@ import UserRegistration from "./components/UserRegister";
 import CustomerRegistration from "./components/CustomerRegister";
 import ManagerRegistration from "./components/ManagerRegister";
 import ManagerCustomerRegistration from "./components/ManagerCustomerRegister";
+import CreateTheater from "./components/CreateTheater";
+import CreateMovie from "./components/CreateMovie";
+import ScheduleMovie from "./components/ScheduleMovie";
 
 class App extends Component {
   render() {
@@ -44,6 +47,9 @@ class App extends Component {
               component={AdminOnlyFunctionality}
             ></Route>
             <Route path="/manageUser" component={ManageUser} />
+            <Route path="/createTheater" component={CreateTheater}></Route>
+            <Route path="/createMovie" component={CreateMovie}></Route>
+            <Route path="/scheduleMovie" component={ScheduleMovie}></Route>
             <Route component={NotFound} />
           </Switch>
         </div>

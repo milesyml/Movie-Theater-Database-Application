@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Form, Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { stat } from "fs";
+import Validation from "./Validation";
 
 class Login extends Component {
   // Only need to pass in the database for users

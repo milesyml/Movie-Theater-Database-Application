@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Form, Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import CreditCardList from "./CreditCardList";
+import Validation from "./Validation";
 class ManagerCustomerRegistration extends Component {
   state = {
     firstName: "",
@@ -11,12 +12,17 @@ class ManagerCustomerRegistration extends Component {
     confirmPassword: "",
     company: "4400TC",
     address: "",
-    city: "AL",
-    state: "",
+    city: "",
+    state: "AL",
     zipcode: "",
     my_list: [],
     max_number: 5,
-    tempCardNumber: ""
+    tempCardNumber: "",
+    validPassword: true,
+    samePassword: true,
+    validCreditCard: true,
+    validZipcode: true,
+    validZipcode: true
   };
 
   handleChange = e => {
@@ -30,12 +36,26 @@ class ManagerCustomerRegistration extends Component {
     console.log("Submit");
     e.preventDefault();
     console.log(this.state);
+    this.setState({
+      validPassword: Validation.isPassword(this.state.password),
+      samePassword: Validation.isSame(
+        this.state.password,
+        this.state.confirmPassword
+      ),
+      validZipcode: Validation.isZipcode(this.state.zipcode)
+    });
   };
 
   handleAddCard = () => {
     if (this.state.my_list.length < this.state.max_number) {
       if (this.state.tempCardNumber != "") {
         var new_list = this.state.my_list;
+        this.setState({
+          validCreditCard: Validation.isCreditCard(this.state.tempCardNumber)
+        });
+        if (!Validation.isCreditCard(this.state.tempCardNumber)) {
+          return;
+        }
         new_list.push(this.state.tempCardNumber);
         this.setState({ my_list: new_list });
       }
@@ -219,6 +239,10 @@ class ManagerCustomerRegistration extends Component {
               Register
             </Button>
           </div>
+          {!this.state.validPassword && <p>Incorrect password input</p>}
+          {!this.state.samePassword && <p>Password doesn't match</p>}
+          {!this.state.validCreditCard && <p>Invalid creditcard</p>}
+          {!this.state.validZipcode && <p>Invalid zipcode</p>}
         </Form>
       </div>
     );
