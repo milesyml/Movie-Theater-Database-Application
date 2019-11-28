@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
 
 class ManageUser extends Component {
   state = {
@@ -9,80 +8,38 @@ class ManageUser extends Component {
     order: 1,
     selected: null,
     showEmptyError: false,
-    data: [
-      {
-        username: "minglong",
-        creditCardCount: 3,
-        userType: "Admin",
-        status: "Pending"
-      },
-      {
-        username: "ang",
-        creditCardCount: 3,
-        userType: "Admin",
-        status: "Pending"
-      },
-      {
-        username: "bad",
-        creditCardCount: 3,
-        userType: "Admin",
-        status: "Pending"
-      },
-      {
-        username: "zxcv",
-        creditCardCount: 3,
-        userType: "Admin",
-        status: "Pending"
-      },
-      {
-        username: "minglong",
-        creditCardCount: 2,
-        userType: "Admin",
-        status: "Pending"
-      },
-      {
-        username: "minglong",
-        creditCardCount: 1,
-        userType: "Admin",
-        status: "Pending"
-      },
-      {
-        username: "minglong",
-        creditCardCount: 5,
-        userType: "Admin",
-        status: "Pending"
-      },
-      {
-        username: "minglong",
-        creditCardCount: 3,
-        userType: "Manager",
-        status: "Pending"
-      },
-      {
-        username: "minglong",
-        creditCardCount: 3,
-        userType: "User",
-        status: "Pending"
-      },
-      {
-        username: "minglong",
-        creditCardCount: 3,
-        userType: "User",
-        status: "Approved"
-      },
-      {
-        username: "minglong",
-        creditCardCount: 3,
-        userType: "User",
-        status: "Declined"
-      }
-    ]
+    data: [],
+    error: null
   };
 
   stickyHeader = {
     position: "sticky",
     top: 0
   };
+
+  componentDidMount() {
+    fetch("http://localhost:5000/admin_filter_user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: this.state.username,
+        status: this.state.status,
+        sortBy: "",
+        sortDirection: ""
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.json();
+        }
+      })
+      .then(data => this.setState({ data }))
+      .catch(err => this.setState({ error: "Internal Server Error." }));
+  }
 
   handleChange = e => {
     this.setState({
@@ -92,46 +49,81 @@ class ManageUser extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    console.log("Submit");
-    console.log(this.state);
-
-    // TODO: backend call
+    this.setState({ error: false });
+    fetch("http://localhost:5000/admin_filter_user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: this.state.username,
+        status: this.state.status,
+        sortBy: "",
+        sortDirection: ""
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.json();
+        }
+      })
+      .then(data => this.setState({ data }))
+      .catch(err => this.setState({ error: "Internal Server Error." }));
   };
 
-  handleApprove = () => {
+  handleApproveOrDecline = url => {
+    this.setState({ error: null });
+
     if (!this.state.selected) {
       this.setState({ showEmptyError: true });
+      return;
     }
 
-    // TODO: backend call
+    fetch("http://localhost:5000/" + url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: this.state.selected.username
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response;
+        }
+      })
+      .then(response => this.componentDidMount())
+      .catch(err => {
+        if (err.message === "400") {
+          this.setState({ error: "Unable to decline selected row." });
+        } else {
+          this.setState({ error: "Internal Server Error." });
+        }
+      });
   };
 
-  handleDecline = () => {
-    if (!this.state.selected) {
-      this.setState({ showEmptyError: true });
-    }
-
-    // TODO: backend call
-  };
-
-  sortData = index => {
+  sortData = sortingKey => {
     if (this.state.data.length === 0) {
       return;
     }
 
-    const sortingKey = Object.keys(this.state.data[0])[index];
     const newData = [...this.state.data];
 
-    if (this.state.sortedByCol === index) {
+    if (this.state.sortedByCol === sortingKey) {
       newData.sort(this.compareValues(sortingKey, this.state.order * -1));
       this.setState({
-        sortedByCol: index,
+        sortedByCol: sortingKey,
         order: this.state.order * -1,
         data: newData
       });
     } else {
       newData.sort(this.compareValues(sortingKey, 1));
-      this.setState({ sortedByCol: index, order: 1, data: newData });
+      this.setState({ sortedByCol: sortingKey, order: 1, data: newData });
     }
   };
 
@@ -210,15 +202,25 @@ class ManageUser extends Component {
           </form>
         </div>
 
-        <button className="btn btn-primary m-2" onClick={this.handleApprove}>
+        <button
+          className="btn btn-primary m-2"
+          onClick={() => this.handleApproveOrDecline("admin_approve_user")}
+        >
           Approve
         </button>
-        <button className="btn btn-primary m-2" onClick={this.handleDecline}>
+        <button
+          className="btn btn-primary m-2"
+          onClick={() => this.handleApproveOrDecline("admin_decline_user")}
+        >
           Decline
         </button>
 
         {this.state.showEmptyError && (
           <div className="alert alert-danger">No row selected</div>
+        )}
+
+        {this.state.error && (
+          <div className="alert alert-danger">{this.state.error}</div>
         )}
 
         <div style={{ height: 400, overflow: "auto" }}>
@@ -233,16 +235,28 @@ class ManageUser extends Component {
             <thead className="thead-dark">
               <tr>
                 <th style={this.stickyHeader} />
-                <th onClick={() => this.sortData(0)} style={this.stickyHeader}>
+                <th
+                  onClick={() => this.sortData("username")}
+                  style={this.stickyHeader}
+                >
                   Username
                 </th>
-                <th onClick={() => this.sortData(1)} style={this.stickyHeader}>
+                <th
+                  onClick={() => this.sortData("creditCardCount")}
+                  style={this.stickyHeader}
+                >
                   Credit Card Count
                 </th>
-                <th onClick={() => this.sortData(2)} style={this.stickyHeader}>
+                <th
+                  onClick={() => this.sortData("userType")}
+                  style={this.stickyHeader}
+                >
                   User Type
                 </th>
-                <th onClick={() => this.sortData(3)} style={this.stickyHeader}>
+                <th
+                  onClick={() => this.sortData("status")}
+                  style={this.stickyHeader}
+                >
                   Status
                 </th>
               </tr>
