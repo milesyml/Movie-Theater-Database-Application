@@ -8,12 +8,13 @@ class Login extends Component {
   state = {
     username: "",
     password: "",
-    users: [
-      ["morris", "morris"],
-      ["dominic", "dominic"]
-    ],
-    isCorrect: true
+    isCorrect: true,
+    error: null
   };
+
+  componentDidMount() {
+    this.props.resetUser();
+  }
 
   handleChange = e => {
     this.setState({
@@ -22,72 +23,64 @@ class Login extends Component {
   };
 
   handleSubmit = e => {
-    console.log("Submit");
     e.preventDefault();
-    console.log(this.state);
-  };
+    this.setState({ error: null });
+    fetch("http://localhost:5000/user_login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: this.state.username,
+        password: this.state.password
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.json();
+        }
+      })
+      .then(user => {
+        if (user.status !== "approved") {
+          this.setState({ error: "Not an approved user." });
+          return;
+        }
 
-  validation = () => {
-    for (var i = 0; i < this.state.users.length; i++) {
-      if (
-        this.state.users[i][0] == this.state.username &&
-        this.state.users[i][1] == this.state.password
-      ) {
-        return true;
-      }
-    }
-    return false;
-  };
+        this.props.updateUser(user.username);
 
-  checkingSubmit = () => {
-    if (this.validation()) {
-      return (
-        <Link to={"/adminOnlyFunctionality"}>
-          <button
-            type="submit"
-            className="btn btn-secondary lighten-1 z-depth-0"
-          >
-            Login
-          </button>
-        </Link>
-      );
-    } else {
-      return (
-        <button
-          type="submit"
-          className="btn btn-secondary lighten-1 z-depth-0"
-          onClick={this.handleErrorInput}
-        >
-          Login
-        </button>
-      );
-    }
-  };
-
-  handleErrorInput = () => {
-    this.setState({
-      isCorrect: false
-    });
-    if (this.state.username === "" && this.state.password === "")
-      this.setState({
-        isCorrect: true
+        if (user.isAdmin) {
+          if (user.isCustomer) {
+            this.props.history.push("/adminCustomerFunctionality");
+          } else {
+            this.props.history.push("/adminOnlyFunctionality");
+          }
+        } else if (user.isManager) {
+          if (user.isCustomer) {
+            this.props.history.push("/managerCustomerFunctionality");
+          } else {
+            this.props.history.push("/managerOnlyFunctionality");
+          }
+        } else if (user.isCustomer) {
+          this.props.history.push("/customerFunctionality");
+        } else {
+          this.props.history.push("/userFunctionality");
+        }
+      })
+      .catch(err => {
+        if (err.message === "400") {
+          this.setState({ error: "Wrong username or password." });
+        } else {
+          this.setState({ error: "Internal Server Error." });
+        }
       });
-    for (var i = 0; i < this.state.users.length; i++) {
-      if (
-        this.state.users[i][0] == this.state.username &&
-        this.state.users[i][1] == this.state.password
-      ) {
-        this.setState({
-          isCorrect: true
-        });
-      }
-    }
   };
 
   render() {
     return (
       <div className="center-div">
-        <Form style={{ width: 400, height: 200 }} onSubmit={this.handleSubmit}>
+        <form onSubmit={this.handleSubmit}>
           <h1>Atlanta Movie Login</h1>
           <div className="InputField" style={{ marginTop: 20 }}>
             <label htmlFor="username">Username: </label>
@@ -105,8 +98,20 @@ class Login extends Component {
               onChange={this.handleChange}
             ></input>
           </div>
+
+          {this.state.error && (
+            <div className="alert alert-danger" style={{ marginTop: 10 }}>
+              {this.state.error}
+            </div>
+          )}
+
           <div style={{ marginTop: 10 }}>
-            {this.checkingSubmit()}
+            <button
+              type="submit"
+              className="btn btn-secondary lighten-1 z-depth-0"
+            >
+              Login
+            </button>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <Link to={{ pathname: "/register", state: { name: "testing" } }}>
               <button className="btn btn-secondary lighten-1 z-depth-0">
@@ -115,7 +120,7 @@ class Login extends Component {
             </Link>
           </div>
           {!this.state.isCorrect && "Username or password incorrect"}
-        </Form>
+        </form>
       </div>
     );
   }
