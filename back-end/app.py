@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response
 import mysql.connector
 from mysql.connector import Error
 from dateutil import parser
@@ -10,6 +10,13 @@ connection = mysql.connector.connect(host="localhost",
                                      user="root",
                                      password="",
                                      database="team36")
+
+def none_convert(input):
+    """Converts empty string to None to feed to callproc"""
+    if not input:
+        return None
+    else:
+        return input
 
 @app.route('/')
 def index():
@@ -56,7 +63,7 @@ def get_movies():
 def user_login():
     if request.method == "POST":
         details = request.json
-        user, pw = details['user'], details['pw']
+        user, pw = details['userName'], details['password']
 
         try:
             cur = connection.cursor()
@@ -68,10 +75,9 @@ def user_login():
                 cur.close()
                 return make_response('Login Failed', 400)
                 
-            #status, isCustomer, isAdmin, isManager = rv[0][1], rv[0][2], rv[0][3], rv[0][4]
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
-            return jsonify(items[0])
+            return items
         except mysql.connector.IntegrityError as error:
             cur.close()
             msg = "Input Error: {}".format(error)
@@ -87,7 +93,7 @@ def user_login():
 def user_register():
     if request.method == "POST":
         details = request.json
-        user, pw, first, last = details['user'], details['pw'], details['first'], details['last']
+        user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
 
         try:
             cur = connection.cursor()
@@ -109,7 +115,7 @@ def user_register():
 def customer_only_register():
     if request.method == "POST":
         details = request.json
-        user, pw, first, last = details['user'], details['pw'], details['first'], details['last']
+        user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
 
         try:
             cur = connection.cursor()
@@ -131,7 +137,7 @@ def customer_only_register():
 def add_credit():
     if request.method == "POST":
         details = request.json
-        user, cards  = details['user'], details['cards'] #List in json
+        user, cards  = details['userName'], details['cards'] #List in json
 
         try:
             cur = connection.cursor()
@@ -154,7 +160,7 @@ def add_credit():
 def manager_only_register():
     if request.method == "POST":
         details = request.json
-        user, pw, first, last = details['user'], details['pw'], details['first'], details['last']
+        user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
         comName, street, city = details['comName'], details['street'], details['city']
         state, zipCode = details['state'], details['zipCode']
 
@@ -178,7 +184,7 @@ def manager_only_register():
 def manager_customer_register():
     if request.method == "POST":
         details = request.json
-        user, pw, first, last = details['user'], details['pw'], details['first'], details['last']
+        user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
         comName, street, city = details['comName'], details['street'], details['city']
         state, zipCode = details['state'], details['zipCode']
 
@@ -198,12 +204,37 @@ def manager_customer_register():
             return make_response(msg, 500)
 
 #Screen 13 (Admin Filter User)
+#Untested
+@app.route('/admin_filter_user', methods=['POST'])
+def admin_filter_user():
+    if request.method == "POST":
+        details = request.json
+        user, status = details['userName'], details['status']
+        sortBy, sortDirection = details['sortBy'], details['sortDirection']
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('admin_filter_user', [user, status, sortBy, sortDirection]) 
+            cur.execute('SELECT * FROM adfilteruser')
+            rv = cur.fetchall()
+
+            items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
+            cur.close()
+            return jsonify(items)
+        except mysql.connector.IntegrityError as error:
+            cur.close()
+            msg = "Input Error: {}".format(error)
+            return make_response(msg, 400)
+        except mysql.connector.Error as error:
+            cur.close()
+            msg = "Failed to execute stored procedure: {}".format(error)
+            return make_response(msg, 500)   
 
 #Screen 13 (User Approval)
 @app.route('/admin_approve_user', methods=['POST'])
 def approve_user():
     if request.method == "POST":
-        user = request.json['user']
+        user = request.json['userName']
 
         try:
             cur = connection.cursor()
@@ -224,7 +255,7 @@ def approve_user():
 @app.route('/admin_decline_user', methods=['POST'])
 def decline_user():
     if request.method == "POST":
-        user = request.json['user']
+        user = request.json['userName']
 
         try:
             cur = connection.cursor()
@@ -246,6 +277,43 @@ def decline_user():
             return make_response(msg, 500)
 
 #Screen 14 (Admin Filter Company)
+#Untested
+@app.route('/admin_filter_company', methods=['POST'])
+def admin_filter_company():
+    if request.method == "POST":
+        details = request.json
+        comName, minCity, maxCity = details['comName'], none_convert(details['minCity']), none_convert(details['maxCity'])
+        minTheater, maxTheater = none_convert(details['minTheater']), none_convert(details['maxTheater'])
+        minEmployee, maxEmployee = none_convert(details['minEmployee']), none_convert(details['maxEmployee'])
+        sortBy, sortDirection = details['sortBy'], details['sortDirection']
+
+        if minCity and maxCity:
+            if minCity > maxCity:
+                return make_response("Minimum number of cities must be less than the maximum",400) 
+        if minTheater and maxTheater:
+            if minTheater > maxTheater:
+                return make_response("Minimum number of theaters must be less than the maximum",400) 
+        if minEmployee and maxEmployee:
+            if minEmployee > maxEmployee:
+                return make_response("Minimum number of employees must be less than the maximum",400) 
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('admin_filter_company', [comName,minCity,maxCity,minTheater,maxTheater,minEmployee,maxEmployee,sortBy,sortDirection]) 
+            cur.execute('SELECT * FROM adfiltercom')
+            rv = cur.fetchall()
+
+            items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
+            cur.close()
+            return jsonify(items)
+        except mysql.connector.IntegrityError as error:
+            cur.close()
+            msg = "Input Error: {}".format(error)
+            return make_response(msg, 400)
+        except mysql.connector.Error as error:
+            cur.close()
+            msg = "Failed to execute stored procedure: {}".format(error)
+            return make_response(msg, 500)  
 
 #Screen 15 (Get Eligible Managers)
 # @app.route('/get_eligible_managers', methods=['GET'])
@@ -348,12 +416,43 @@ def admin_view_comDetail_th():
             msg = "Failed to execute stored procedure: {}".format(error)
             return make_response(msg, 500)
 
+#Screen 16 (Combine Theater and Employee)
+@app.route('/admin_view_comDetail_combined', methods=['POST'])
+def admin_view_comDetail_combined():
+    if request.method == "POST":
+        comName = request.json['comName']
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('admin_view_comDetail_emp', [comName])
+            cur.execute('select concat(empfirstname, " ", emplastname) from adcomdetailemp')
+            emp = cur.fetchall()
+            emp = [i[0] for i in emp]
+            cur.close()
+
+            cur = connection.cursor()
+            cur.callproc('admin_view_comDetail_th', [comName])
+            cur.execute("""SELECT thName, concat(firstname, ' ', lastname) as manName, thCity, thState, thCapacity FROM 
+                            team36.adcomdetailth inner join user on thManagerUsername = username; """)
+            rv = cur.fetchall()
+            items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
+            cur.close()
+            return jsonify(emp,items)
+        except mysql.connector.IntegrityError as error:
+            cur.close()
+            msg = "Input Error: {}".format(error)
+            return make_response(msg, 400)
+        except mysql.connector.Error as error:
+            cur.close()
+            msg = "Failed to execute stored procedure: {}".format(error)
+            return make_response(msg, 500)
+
 #Screen 17 (Create Movie)
 @app.route('/admin_create_mov', methods=['POST'])
 def admin_create_mov():
     if request.method == "POST":
         details = request.json
-        name, duration, date = details['name'], details['duration'], details['date']
+        name, duration, date = details['name'], details['duration'], details['releaseDate']
 
         try:
             cur = connection.cursor()
@@ -371,9 +470,47 @@ def admin_create_mov():
             return make_response(msg, 500)
 
 #Screen 18 (Manager Filter Theater)
+#Untested
+@app.route('/manager_filter_th', methods=['POST'])
+def manager_filter_th():
+    if request.method == "POST":
+        details = request.json
+        manUsername, movName = details['manUsername'], details['movName']
+        minMovDuration, maxMovDuration = none_convert(details['minMovDuration']), none_convert(details['maxMovDuration'])
+        minMovReleaseDate, maxMovReleaseDate = none_convert(details['minMovReleaseDate']), none_convert(details['maxMovReleaseDate'])
+        minMovPlayDate, maxMovPlayDate = none_convert(details['minMovPlayDate']), none_convert(details['maxMovPlayDate'])
+        includeNotPlayed = none_convert(details['includeNotPlayed'])
+
+
+        if minMovDuration and maxMovDuration:
+            if minMovDuration > maxMovDuration:
+                return make_response("Minimum movie duration must be less than the maximum",400)  
+        if minMovReleaseDate and maxMovReleaseDate:
+            if parser.parse(minMovReleaseDate) > parser.parse(maxMovReleaseDate):
+                return make_response("Minimum release date must be before the maximum",400)  
+        if minMovPlayDate and maxMovPlayDate:
+            if parser.parse(minMovPlayDate) > parser.parse(maxMovPlayDate):
+                return make_response("Minimum play date must be before the maximum",400)  
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('manager_filter_th', [manUsername,movName,minMovDuration,maxMovDuration,minMovReleaseDate,maxMovReleaseDate,minMovPlayDate,maxMovPlayDate,includeNotPlayed]) 
+            cur.execute('SELECT * FROM manfilterth')
+            rv = cur.fetchall()
+
+            items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
+            cur.close()
+            return jsonify(items)
+        except mysql.connector.IntegrityError as error:
+            cur.close()
+            msg = "Input Error: {}".format(error)
+            return make_response(msg, 400)
+        except mysql.connector.Error as error:
+            cur.close()
+            msg = "Failed to execute stored procedure: {}".format(error)
+            return make_response(msg, 500)  
 
 #Screen 19 (Manager Schedule Movie)
-#Untested
 @app.route('/manager_schedule_mov', methods=['POST'])
 def manager_schedule_mov():
     if request.method == "POST":
@@ -405,7 +542,7 @@ def get_customer_cards():
     try:
         if request.method == "POST":
             details = request.json
-            user = details['user']
+            user = details['userName']
 
             cur = connection.cursor()
             cur.execute("SELECT creditcardnumber FROM creditcard where username = '{}'".format(user))
@@ -417,9 +554,38 @@ def get_customer_cards():
         return make_response(msg, 500)
 
 #Screen 20 (Customer Filter Movie)
+#Untested & Logical Constraints Not Done?
+@app.route('/customer_filter_mov', methods=['POST'])
+def customer_filter_mov():
+    if request.method == "POST":
+        details = request.json
+        movName, comName, city, state = details['movName'], details['comName'], details['city'], details['state']
+        minMovPlayDate, maxMovPlayDate = none_convert(details['minMovReleaseDate']), none_convert(details['maxMovReleaseDate'])
+
+        if minMovPlayDate and maxMovPlayDate:
+            if parser.parse(minMovPlayDate) > parser.parse(maxMovPlayDate):
+                return make_response("Minimum play date must be before the maximum",400) 
+
+        try:
+            cur = connection.cursor()
+            cur.callproc('customer_filter_mov', [movName, comName, city, state, minMovPlayDate, maxMovPlayDate]) 
+            cur.execute('SELECT * FROM cosfiltermovie')
+            rv = cur.fetchall()
+
+            items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
+            cur.close()
+            return jsonify(items)
+        except mysql.connector.IntegrityError as error:
+            cur.close()
+            msg = "Input Error: {}".format(error)
+            return make_response(msg, 400)
+        except mysql.connector.Error as error:
+            cur.close()
+            msg = "Failed to execute stored procedure: {}".format(error)
+            return make_response(msg, 500) 
 
 #Screen 20 (Customer View Movie)
-#Untested & logical constraint of 3 movies per day not added
+#Please test logical constraint
 @app.route('/customer_view_movie', methods=['POST'])
 def customer_view_movie():
     if request.method == "POST":
@@ -429,7 +595,15 @@ def customer_view_movie():
 
         try:
             cur = connection.cursor()
-            cur.callproc('customer_view_movie', [cardNum, movName, releaseDate, thName, comName, playDate])
+            cur.execute("""select * from customerviewmovie where creditcardnumber in
+                        (select creditcardnumber from creditcard where username = 
+                        (select username from creditcard where creditcardnumber = '{}'))
+                        and viewdate = '{}';""".format(cardNum,playDate))
+            rv = cur.fetchall()
+            if len(rv) > 3:
+                return make_response("Viewing more than 3 movies a day is not permitted", 400)
+            
+            cur.callproc('customer_view_mov', [cardNum, movName, releaseDate, thName, comName, playDate])
             connection.commit() #Commit insertion
             cur.close()
             return "Viewing Added"
@@ -446,7 +620,7 @@ def customer_view_movie():
 @app.route('/customer_view_history', methods=['POST'])
 def customer_view_history():
     if request.method == "POST":
-        user = request.json['user']
+        user = request.json['userName']
 
         try:
             cur = connection.cursor()
@@ -483,7 +657,6 @@ def get_theater():
 
 
 #Screen 22 (User Filter Theater)
-#Untested, procedure needs to be fixed
 @app.route('/user_filter_th', methods=['POST'])
 def user_filter_th():
     if request.method == "POST":
@@ -493,7 +666,7 @@ def user_filter_th():
         try:
             cur = connection.cursor()
             cur.callproc('user_filter_th', [thName, comName, city, state])
-            cur.execute("select * from userfilterth")
+            cur.execute("select thName as theater, concat(thStreet,', ',thCity,', ',thState,' ',thZipcode) as address, comName as company from userfilterth")
             rv = cur.fetchall()
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
@@ -508,12 +681,11 @@ def user_filter_th():
             return make_response(msg, 500)
 
 #Screen 22 (User Visit Theater)
-#Untested, procedure needs to be fixed
 @app.route('/user_visit_th', methods=['POST'])
 def user_visit_th():
     if request.method == "POST":
         details = request.json
-        thName, comName, date, user = details['thName'], details['comName'], details['date'], details['user']
+        thName, comName, date, user = details['thName'], details['comName'], details['date'], details['userName']
 
         try:
             cur = connection.cursor()
@@ -531,17 +703,21 @@ def user_visit_th():
             return make_response(msg, 500)
 
 #Screen 23 (User Filter Visit History)
-#Untested, procedure needs to be fixed
 @app.route('/user_filter_visitHistory', methods=['POST'])
 def user_filter_visitHistory():
     if request.method == "POST":
         details = request.json
-        user, minDate, maxDate = details['user'], details['minDate'], details['maxDate']
+        user, minDate, maxDate = details['userName'], details['minDate'], details['maxDate']
+        minDate = none_convert(minDate)
+        maxDate = none_convert(maxDate)
 
+        if minDate and maxDate:
+            if parser.parse(minDate) > parser.parse(maxDate):
+                return make_response("Minimum Date must be before Maximum Date",400)           
         try:
             cur = connection.cursor()
             cur.callproc('user_filter_visitHistory', [user, minDate, maxDate])
-            cur.execute("select * from uservisithistory")
+            cur.execute("select thName as theater, concat(thStreet,', ',thCity,', ',thState,' ',thZipcode) as address, comName as company, visitDate from uservisithistory")
             rv = cur.fetchall()
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
