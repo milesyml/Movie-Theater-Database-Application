@@ -135,9 +135,12 @@ class CompanyDetail extends Component {
           </table>
         </div>
 
-        <Link to="/manageCompany">
-          <button className="btn btn-primary m-2">Back</button>
-        </Link>
+        <button
+          className="btn btn-primary m-2"
+          onClick={this.props.history.goBack}
+        >
+          Back
+        </button>
       </React.Fragment>
     );
   }
