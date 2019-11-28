@@ -72,7 +72,7 @@ Error occured: {error message}
 
 @input example
 {
-	"userName": "calcwizard",
+	"username": "calcwizard",
 	"password":"222222222"
 }
 
