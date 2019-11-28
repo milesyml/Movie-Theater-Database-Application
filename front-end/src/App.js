@@ -13,6 +13,7 @@ import ManagerCustomerRegistration from "./components/ManagerCustomerRegister";
 import ManageCompany from "./components/ManageCompany";
 import CompanyDetail from "./components/CompanyDetail";
 import TheaterOverview from "./components/TheaterOverview";
+import ManagerOnlyFunctionality from "./components/ManagerOnlyFunctionality";
 
 class App extends Component {
   render() {
@@ -45,6 +46,10 @@ class App extends Component {
             <Route
               path="/adminOnlyFunctionality"
               component={AdminOnlyFunctionality}
+            ></Route>
+            <Route
+              path="/managerOnlyFunctionality"
+              component={ManagerOnlyFunctionality}
             ></Route>
             <Route path="/manageUser" component={ManageUser} />
             <Route path="/manageCompany" component={ManageCompany} />

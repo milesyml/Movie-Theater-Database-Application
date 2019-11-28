@@ -3,80 +3,82 @@ import { Link } from "react-router-dom";
 
 class TheaterOverview extends Component {
   state = {
-    username: "",
-    status: "All",
-    sortedByCol: null,
-    order: 1,
+    movieName: "",
+    movieDurationFrom: null,
+    movieDurationTo: null,
+    movieReleaseDateFrom: null,
+    movieReleaseDateTo: null,
+    moviePlayDateFrom: null,
+    moviePlayDateTo: null,
+    onlyIncludeNotPlayed: false,
     data: [
       {
-        username: "minglong",
-        creditCardCount: 3,
-        userType: "Admin",
-        status: "Pending"
+        movieName: "minglong",
+        duration: 3,
+        releaseData: "Admin",
+        playDate: "Pending"
       },
       {
-        username: "ang",
-        creditCardCount: 3,
-        userType: "Admin",
-        status: "Pending"
+        movieName: "ang",
+        duration: 3,
+        releaseData: "Admin",
+        playDate: "Pending"
       },
       {
-        username: "bad",
-        creditCardCount: 3,
-        userType: "Admin",
-        status: "Pending"
+        movieName: "bad",
+        duration: 3,
+        releaseData: "Admin",
+        playDate: "Pending"
       },
       {
-        username: "zxcv",
-        creditCardCount: 3,
-        userType: "Admin",
-        status: "Pending"
+        movieName: "zxcv",
+        duration: 3,
+        releaseData: "Admin",
+        playDate: "Pending"
       },
       {
-        username: "minglong",
-        creditCardCount: 2,
-        userType: "Admin",
-        status: "Pending"
+        movieName: "minglong",
+        duration: 2,
+        releaseData: "Admin",
+        playDate: "Pending"
       },
       {
-        username: "minglong",
-        creditCardCount: 1,
-        userType: "Admin",
-        status: "Pending"
+        movieName: "minglong",
+        duration: 1,
+        releaseData: "Admin",
+        playDate: "Pending"
       },
       {
-        username: "minglong",
-        creditCardCount: 5,
-        userType: "Admin",
-        status: "Pending"
+        movieName: "minglong",
+        duration: 5,
+        releaseData: "Admin",
+        playDate: "Pending"
       },
       {
-        username: "minglong",
-        creditCardCount: 3,
-        userType: "Manager",
-        status: "Pending"
+        movieName: "minglong",
+        duration: 3,
+        releaseData: "Manager",
+        playDate: "Pending"
       },
       {
-        username: "minglong",
-        creditCardCount: 3,
-        userType: "User",
-        status: "Pending"
+        movieName: "minglong",
+        duration: 3,
+        releaseData: "User",
+        playDate: "Pending"
       },
       {
-        username: "minglong",
-        creditCardCount: 3,
-        userType: "User",
-        status: "Approved"
+        movieName: "minglong",
+        duration: 3,
+        releaseData: "User",
+        playDate: "Approved"
       },
       {
-        username: "minglong",
-        creditCardCount: 3,
-        userType: "User",
-        status: "Declined"
+        movieName: "minglong",
+        duration: 3,
+        releaseData: "User",
+        playDate: "Declined"
       }
-    ],
-    selected: null,
-    showEmptyError: false
+    ]
   };
 
   stickyHeader = {
@@ -98,77 +100,19 @@ class TheaterOverview extends Component {
     // TODO: backend call
   };
 
-  handleApprove = () => {
-    if (!this.state.selected) {
-      this.setState({ showEmptyError: true });
-    }
-
-    // TODO: backend call
-  };
-
-  handleDecline = () => {
-    if (!this.state.selected) {
-      this.setState({ showEmptyError: true });
-    }
-
-    // TODO: backend call
-  };
-
-  sortData = index => {
-    if (this.state.data.length === 0) {
-      return;
-    }
-
-    const sortingKey = Object.keys(this.state.data[0])[index];
-    const newData = [...this.state.data];
-
-    if (this.state.sortedByCol === index) {
-      newData.sort(this.compareValues(sortingKey, this.state.order * -1));
-      this.setState({
-        sortedByCol: index,
-        order: this.state.order * -1,
-        data: newData
-      });
-    } else {
-      newData.sort(this.compareValues(sortingKey, 1));
-      this.setState({ sortedByCol: index, order: 1, data: newData });
-    }
-  };
-
-  compareValues = (key, order) => {
-    return (a, b) => {
-      if (a[key] < b[key]) {
-        return -1 * order;
-      } else if (a[key] > b[key]) {
-        return 1 * order;
-      } else {
-        return 0;
-      }
-    };
-  };
-
-  selectRow = e => {
-    const newSelected = this.state.data[e.target.id];
-    this.setState({ selected: newSelected, showEmptyError: false });
+  toggleCheckbox = e => {
+    this.setState({ [e.target.id]: !this.state[e.target.id] });
   };
 
   renderData = () => {
     return this.state.data.map((user, index) => {
-      const { username, creditCardCount, userType, status } = user;
+      const { movieName, duration, releaseData, playDate } = user;
       return (
         <tr key={index}>
-          <td>
-            <input
-              id={index}
-              type="radio"
-              name="current_user"
-              onClick={this.selectRow}
-            />
-          </td>
-          <td>{username}</td>
-          <td>{creditCardCount}</td>
-          <td>{userType}</td>
-          <td>{status}</td>
+          <td>{movieName}</td>
+          <td>{duration}</td>
+          <td>{releaseData}</td>
+          <td>{playDate}</td>
         </tr>
       );
     });
@@ -177,49 +121,98 @@ class TheaterOverview extends Component {
   render() {
     return (
       <React.Fragment>
-        <div style={{ padding: 50, height: 200 }}>
-          <h1>Manage User</h1>
+        <div style={{ marginTop: 50, marginBottom: 10 }}>
+          <h1>Theater Overview</h1>
           <p></p>
 
           <form onSubmit={this.handleSubmit}>
-            <div className="grid-3-col">
+            <div className="grid-2-col-3-row">
               <div>
-                <label htmlFor="username">Username</label>
+                <label htmlFor="movieName">Movie Name</label>
                 &nbsp;
                 <input
                   type="text"
-                  id="username"
+                  id="movieName"
                   onChange={this.handleChange}
                 ></input>
               </div>
 
               <div>
-                <label htmlFor="status">Status</label>
+                <label htmlFor="movieDurationFrom">Movie Duration</label>
                 &nbsp;
-                <select id="status" onChange={this.handleChange}>
-                  <option defaultValue="All">All</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Declined">Declined</option>
-                  <option value="Approved">Approved</option>
-                </select>
+                <input
+                  type="text"
+                  id="movieDurationFrom"
+                  size="3"
+                  onChange={this.handleChange}
+                ></input>
+                &nbsp;
+                <span>--</span>
+                &nbsp;
+                <input
+                  type="text"
+                  id="movieDurationTo"
+                  size="3"
+                  onChange={this.handleChange}
+                ></input>
               </div>
-              <button type="submit" className="btn btn-primary m-2">
-                Filter
-              </button>
+
+              <div className="item-span-2-cols">
+                <label htmlFor="movieReleaseDateFrom">Movie Release Date</label>
+                &nbsp;
+                <input
+                  type="date"
+                  id="movieReleaseDateFrom"
+                  style={{ width: 155 }}
+                  onChange={this.handleChange}
+                ></input>
+                &nbsp;
+                <span>--</span>
+                &nbsp;
+                <input
+                  type="date"
+                  id="movieReleaseDateTo"
+                  style={{ width: 155 }}
+                  onChange={this.handleChange}
+                ></input>
+              </div>
+
+              <div className="item-span-2-cols">
+                <label htmlFor="moviePlayDateFrom">Movie Play Date</label>
+                &nbsp;
+                <input
+                  type="date"
+                  id="moviePlayDateFrom"
+                  style={{ width: 155 }}
+                  onChange={this.handleChange}
+                ></input>
+                &nbsp;
+                <span>--</span>
+                &nbsp;
+                <input
+                  type="date"
+                  id="moviePlayDateTo"
+                  style={{ width: 155 }}
+                  onChange={this.handleChange}
+                ></input>
+              </div>
             </div>
+
+            <div>
+              <input
+                type="checkbox"
+                id="onlyIncludeNotPlayed"
+                onChange={this.toggleCheckbox}
+              ></input>
+              &nbsp;
+              <span>Only Include Not Played Movies</span>
+            </div>
+
+            <button type="submit" className="btn btn-primary m-2">
+              Filter
+            </button>
           </form>
         </div>
-
-        <button className="btn btn-primary m-2" onClick={this.handleApprove}>
-          Approve
-        </button>
-        <button className="btn btn-primary m-2" onClick={this.handleDecline}>
-          Decline
-        </button>
-
-        {this.state.showEmptyError && (
-          <div className="alert alert-danger">Nothing selected</div>
-        )}
 
         <div style={{ height: 400, overflow: "auto" }}>
           <table
@@ -232,18 +225,17 @@ class TheaterOverview extends Component {
           >
             <thead className="thead-dark">
               <tr>
-                <th style={this.stickyHeader} />
                 <th onClick={() => this.sortData(0)} style={this.stickyHeader}>
-                  Username
+                  Movie Name
                 </th>
                 <th onClick={() => this.sortData(1)} style={this.stickyHeader}>
-                  Credit Card Count
+                  Duration
                 </th>
                 <th onClick={() => this.sortData(2)} style={this.stickyHeader}>
-                  User Type
+                  Release Date
                 </th>
                 <th onClick={() => this.sortData(3)} style={this.stickyHeader}>
-                  Status
+                  Play Date
                 </th>
               </tr>
             </thead>
@@ -251,7 +243,7 @@ class TheaterOverview extends Component {
           </table>
         </div>
 
-        <Link to="/adminOnlyFunctionality">
+        <Link to="/managerOnlyFunctionality">
           <button className="btn btn-primary m-2">Back</button>
         </Link>
       </React.Fragment>

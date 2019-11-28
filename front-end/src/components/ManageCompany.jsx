@@ -196,7 +196,7 @@ class ManageCompany extends Component {
   render() {
     return (
       <React.Fragment>
-        <div style={{ padding: 50, height: 200 }}>
+        <div style={{ marginTop: 50, marginBottom: 10 }}>
           <h1>Manage Company</h1>
 
           <form onSubmit={this.handleSubmit}>
