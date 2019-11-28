@@ -57,7 +57,18 @@
   display: grid;
   grid-template-columns: 300px 220px;
   grid-template-rows: 1fr 1fr 1fr;
-  column-gap: 15px;
+  column-gap: 10px;
+  justify-content: center;
+  align-content: center;
+  justify-items: center;
+  align-items: center;
+}
+
+.grid-2-col-2-row-22 {
+  display: grid;
+  grid-template-columns: 300px 220px;
+  grid-template-rows: 1fr 1fr;
+  column-gap: 10px;
   justify-content: center;
   align-content: center;
   justify-items: center;

@@ -15,6 +15,8 @@ import CompanyDetail from "./components/CompanyDetail";
 import TheaterOverview from "./components/TheaterOverview";
 import ManagerOnlyFunctionality from "./components/ManagerOnlyFunctionality";
 import CustomerFunctionality from "./components/CustomerFunctionality";
+import ExploreMovie from "./components/ExploreMovie";
+import ExploreTheater from "./components/ExploreTheater";
 
 class App extends Component {
   render() {
@@ -62,7 +64,9 @@ class App extends Component {
               path="/companyDetail/:companyName"
               component={CompanyDetail}
             />
-            <Route path="/theaterOverview/" component={TheaterOverview} />
+            <Route path="/theaterOverview" component={TheaterOverview} />
+            <Route path="/exploreMovie" component={ExploreMovie} />
+            <Route path="/exploreTheater" component={ExploreTheater} />
             <Route component={NotFound} />
           </Switch>
         </div>

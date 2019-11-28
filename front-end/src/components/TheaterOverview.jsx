@@ -105,8 +105,8 @@ class TheaterOverview extends Component {
   };
 
   renderData = () => {
-    return this.state.data.map((user, index) => {
-      const { movieName, duration, releaseData, playDate } = user;
+    return this.state.data.map((movie, index) => {
+      const { movieName, duration, releaseData, playDate } = movie;
       return (
         <tr key={index}>
           <td>{movieName}</td>
@@ -225,18 +225,10 @@ class TheaterOverview extends Component {
           >
             <thead className="thead-dark">
               <tr>
-                <th onClick={() => this.sortData(0)} style={this.stickyHeader}>
-                  Movie Name
-                </th>
-                <th onClick={() => this.sortData(1)} style={this.stickyHeader}>
-                  Duration
-                </th>
-                <th onClick={() => this.sortData(2)} style={this.stickyHeader}>
-                  Release Date
-                </th>
-                <th onClick={() => this.sortData(3)} style={this.stickyHeader}>
-                  Play Date
-                </th>
+                <th style={this.stickyHeader}>Movie Name</th>
+                <th style={this.stickyHeader}>Duration</th>
+                <th style={this.stickyHeader}>Release Date</th>
+                <th style={this.stickyHeader}>Play Date</th>
               </tr>
             </thead>
             <tbody>{this.renderData()}</tbody>

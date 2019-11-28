@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 class ManageCompany extends Component {
   state = {
-    companyName: "",
+    companyName: "All",
     numCityCoveredFrom: null,
     numCityCoveredTo: null,
     numTheatersFrom: null,
@@ -12,6 +12,8 @@ class ManageCompany extends Component {
     numEmployessTo: null,
     sortedByCol: null,
     order: 1,
+    selected: null,
+    showEmptyError: false,
     data: [
       {
         companyName: "minglong",
@@ -79,9 +81,7 @@ class ManageCompany extends Component {
         numTheaters: "User",
         numEmployee: "Declined"
       }
-    ],
-    selected: null,
-    showEmptyError: false
+    ]
   };
 
   stickyHeader = {
@@ -290,7 +290,7 @@ class ManageCompany extends Component {
         </button>
 
         {this.state.showEmptyError && (
-          <div className="alert alert-danger">Nothing selected</div>
+          <div className="alert alert-danger">No row selected</div>
         )}
 
         <div style={{ height: 400, overflow: "auto" }}>

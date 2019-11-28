@@ -7,6 +7,8 @@ class ManageUser extends Component {
     status: "All",
     sortedByCol: null,
     order: 1,
+    selected: null,
+    showEmptyError: false,
     data: [
       {
         username: "minglong",
@@ -74,9 +76,7 @@ class ManageUser extends Component {
         userType: "User",
         status: "Declined"
       }
-    ],
-    selected: null,
-    showEmptyError: false
+    ]
   };
 
   stickyHeader = {
@@ -218,7 +218,7 @@ class ManageUser extends Component {
         </button>
 
         {this.state.showEmptyError && (
-          <div className="alert alert-danger">Nothing selected</div>
+          <div className="alert alert-danger">No row selected</div>
         )}
 
         <div style={{ height: 400, overflow: "auto" }}>
