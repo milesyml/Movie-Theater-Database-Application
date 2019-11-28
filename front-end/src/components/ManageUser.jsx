@@ -1,9 +1,14 @@
 import React, { Component } from "react";
+import { Link } from "react-router-dom";
 
 class ManageUser extends Component {
   state = {
     username: "",
     status: "All",
+    sortedByCol: null,
+    order: 1,
+    selected: null,
+    showEmptyError: false,
     data: [
       {
         username: "minglong",
@@ -12,56 +17,66 @@ class ManageUser extends Component {
         status: "Pending"
       },
       {
-        username: "minglong",
+        username: "ang",
+        creditCardCount: 3,
+        userType: "Admin",
+        status: "Pending"
+      },
+      {
+        username: "bad",
+        creditCardCount: 3,
+        userType: "Admin",
+        status: "Pending"
+      },
+      {
+        username: "zxcv",
         creditCardCount: 3,
         userType: "Admin",
         status: "Pending"
       },
       {
         username: "minglong",
-        creditCardCount: 3,
+        creditCardCount: 2,
+        userType: "Admin",
+        status: "Pending"
+      },
+      {
+        username: "minglong",
+        creditCardCount: 1,
+        userType: "Admin",
+        status: "Pending"
+      },
+      {
+        username: "minglong",
+        creditCardCount: 5,
         userType: "Admin",
         status: "Pending"
       },
       {
         username: "minglong",
         creditCardCount: 3,
-        userType: "Admin",
+        userType: "Manager",
         status: "Pending"
       },
       {
         username: "minglong",
         creditCardCount: 3,
-        userType: "Admin",
+        userType: "User",
         status: "Pending"
       },
       {
         username: "minglong",
         creditCardCount: 3,
-        userType: "Admin",
-        status: "Pending"
+        userType: "User",
+        status: "Approved"
       },
       {
         username: "minglong",
         creditCardCount: 3,
-        userType: "Admin",
-        status: "Pending"
-      },
-      {
-        username: "minglong",
-        creditCardCount: 3,
-        userType: "Admin",
-        status: "Pending"
-      },
-      {
-        username: "minglong",
-        creditCardCount: 3,
-        userType: "Admin",
-        status: "Pending"
+        userType: "User",
+        status: "Declined"
       }
-    ],
-    selected: null,
-    showEmptyError: false
+    ]
   };
 
   stickyHeader = {
@@ -79,18 +94,57 @@ class ManageUser extends Component {
     e.preventDefault();
     console.log("Submit");
     console.log(this.state);
+
+    // TODO: backend call
   };
 
   handleApprove = () => {
     if (!this.state.selected) {
       this.setState({ showEmptyError: true });
     }
+
+    // TODO: backend call
   };
 
   handleDecline = () => {
     if (!this.state.selected) {
       this.setState({ showEmptyError: true });
     }
+
+    // TODO: backend call
+  };
+
+  sortData = index => {
+    if (this.state.data.length === 0) {
+      return;
+    }
+
+    const sortingKey = Object.keys(this.state.data[0])[index];
+    const newData = [...this.state.data];
+
+    if (this.state.sortedByCol === index) {
+      newData.sort(this.compareValues(sortingKey, this.state.order * -1));
+      this.setState({
+        sortedByCol: index,
+        order: this.state.order * -1,
+        data: newData
+      });
+    } else {
+      newData.sort(this.compareValues(sortingKey, 1));
+      this.setState({ sortedByCol: index, order: 1, data: newData });
+    }
+  };
+
+  compareValues = (key, order) => {
+    return (a, b) => {
+      if (a[key] < b[key]) {
+        return -1 * order;
+      } else if (a[key] > b[key]) {
+        return 1 * order;
+      } else {
+        return 0;
+      }
+    };
   };
 
   selectRow = e => {
@@ -123,30 +177,32 @@ class ManageUser extends Component {
   render() {
     return (
       <React.Fragment>
-        <div style={{ padding: 100, height: 200 }}>
+        <div style={{ marginTop: 50, marginBottom: 10 }}>
           <h1>Manage User</h1>
+          <p></p>
 
           <form onSubmit={this.handleSubmit}>
-            <div className="grid-5-col">
-              <label htmlFor="username">Username</label>
-              <input
-                type="text"
-                id="username"
-                value={this.state.username}
-                onChange={this.handleChange}
-              ></input>
+            <div className="grid-3-col">
+              <div>
+                <label htmlFor="username">Username</label>
+                &nbsp;
+                <input
+                  type="text"
+                  id="username"
+                  onChange={this.handleChange}
+                ></input>
+              </div>
 
-              <label htmlFor="status">Status</label>
-              <select
-                id="status"
-                value={this.state.status}
-                onChange={this.handleChange}
-              >
-                <option defaultValue="All">All</option>
-                <option value="Pending">Pending</option>
-                <option value="Declined">Declined</option>
-                <option value="Approved">Approved</option>
-              </select>
+              <div>
+                <label htmlFor="status">Status</label>
+                &nbsp;
+                <select id="status" onChange={this.handleChange}>
+                  <option defaultValue="All">All</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Declined">Declined</option>
+                  <option value="Approved">Approved</option>
+                </select>
+              </div>
               <button type="submit" className="btn btn-primary m-2">
                 Filter
               </button>
@@ -162,7 +218,7 @@ class ManageUser extends Component {
         </button>
 
         {this.state.showEmptyError && (
-          <div className="alert alert-danger">Nothing selected</div>
+          <div className="alert alert-danger">No row selected</div>
         )}
 
         <div style={{ height: 400, overflow: "auto" }}>
@@ -177,15 +233,30 @@ class ManageUser extends Component {
             <thead className="thead-dark">
               <tr>
                 <th style={this.stickyHeader} />
-                <th style={this.stickyHeader}>Username</th>
-                <th style={this.stickyHeader}>Credit Card Count</th>
-                <th style={this.stickyHeader}>User Type</th>
-                <th style={this.stickyHeader}>Status</th>
+                <th onClick={() => this.sortData(0)} style={this.stickyHeader}>
+                  Username
+                </th>
+                <th onClick={() => this.sortData(1)} style={this.stickyHeader}>
+                  Credit Card Count
+                </th>
+                <th onClick={() => this.sortData(2)} style={this.stickyHeader}>
+                  User Type
+                </th>
+                <th onClick={() => this.sortData(3)} style={this.stickyHeader}>
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>{this.renderData()}</tbody>
           </table>
         </div>
+
+        <button
+          className="btn btn-primary m-2"
+          onClick={this.props.history.goBack}
+        >
+          Back
+        </button>
       </React.Fragment>
     );
   }
