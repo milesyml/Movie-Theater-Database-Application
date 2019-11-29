@@ -384,6 +384,8 @@ def admin_view_comDetail_combined():
             cur.callproc('admin_view_comDetail_emp', [comName])
             cur.execute('select concat(empfirstname, " ", emplastname) from adcomdetailemp')
             emp = cur.fetchall()
+            if not emp:
+                return make_response("Company not found", 400)
             emp = [i[0] for i in emp]
             cur.close()
 

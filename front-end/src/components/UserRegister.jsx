@@ -1,14 +1,16 @@
 import React, { Component } from "react";
 import { Form, Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
-
+import Validation from "./Validation";
 class UserRegistration extends Component {
   state = {
     firstName: "",
     lastName: "",
     username: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    validPassword: true,
+    samePassword: true
   };
 
   handleChange = e => {
@@ -22,6 +24,13 @@ class UserRegistration extends Component {
     console.log("Submit");
     e.preventDefault();
     console.log(this.state);
+    this.setState({
+      validPassword: Validation.isPassword(this.state.password),
+      samePassword: Validation.isSame(
+        this.state.password,
+        this.state.confirmPassword
+      )
+    });
   };
 
   style = {
@@ -99,6 +108,8 @@ class UserRegistration extends Component {
               Register
             </Button>
           </div>
+          {!this.state.validPassword && <p>Incorrect password input</p>}
+          {!this.state.samePassword && <p>Password doesn't match</p>}
         </Form>
       </div>
     );

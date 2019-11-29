@@ -1,22 +1,14 @@
 import React, { Component } from "react";
 import { Form, Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import Validation from "./Validation";
-class ManagerRegistration extends Component {
+class CreateTheater extends Component {
   state = {
-    firstName: "",
-    lastName: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
+    Name: "",
     company: "4400TC",
     address: "",
-    city: "AL",
-    state: "",
+    state: "AL",
     zipcode: "",
-    validPassword: true,
-    samePassword: true,
-    validZipcode: true
+    manager: ""
   };
 
   handleChange = e => {
@@ -30,14 +22,6 @@ class ManagerRegistration extends Component {
     console.log("Submit");
     e.preventDefault();
     console.log(this.state);
-    this.setState({
-      validPassword: Validation.isPassword(this.state.password),
-      samePassword: Validation.isSame(
-        this.state.password,
-        this.state.confirmPassword
-      ),
-      validZipcode: Validation.isZipcode(this.state.zipcode)
-    });
   };
 
   style = {
@@ -53,39 +37,17 @@ class ManagerRegistration extends Component {
   render() {
     return (
       <div
-        className="managerRegister"
+        className="Create Theater"
         style={{ lineHeight: 1.6, padding: 80, justifyContent: "center" }}
       >
-        <h1>Manager-Only Registration</h1>
+        <h1>Create Theater</h1>
         <Form onSubmit={this.handleSubmit}>
           <div className="InputField" style={this.style}>
-            <label htmlFor="firstName" style={{ padding: 10 }}>
-              First Name:{" "}
+            <label htmlFor="Name" style={{ padding: 10 }}>
+              Name:{" "}
             </label>
-            <input
-              type="firstName"
-              id="firstName"
-              onChange={this.handleChange}
-            ></input>
+            <input type="Name" id="Name" onChange={this.handleChange}></input>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <label htmlFor="lastName" style={{ padding: 10 }}>
-              Last Name:{" "}
-            </label>
-            <input
-              type="lastName"
-              id="lastName"
-              onChange={this.handleChange}
-            ></input>
-          </div>
-          <div className="InputField" style={this.style}>
-            <label htmlFor="username" style={{ padding: 10 }}>
-              Username:{" "}
-            </label>
-            <input
-              type="username"
-              id="username"
-              onChange={this.handleChange}
-            ></input>
             <label htmlFor="company" style={{ padding: 10 }}>
               Company:{" "}
             </label>
@@ -95,25 +57,6 @@ class ManagerRegistration extends Component {
               <option value="ATC">ATC</option>
               <option value="EZTC">EZTC</option>
             </select>
-          </div>
-          <div className="InputField" style={this.style}>
-            <label htmlFor="password" style={{ padding: 10 }}>
-              Password:{" "}
-            </label>
-            <input
-              type="password"
-              id="password"
-              onChange={this.handleChange}
-            ></input>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <label htmlFor="confirmPassword" style={{ padding: 10 }}>
-              Confirm Password:{" "}
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              onChange={this.handleChange}
-            ></input>
           </div>
           <div>
             <label htmlFor="address" style={{ padding: 10 }}>
@@ -195,21 +138,38 @@ class ManagerRegistration extends Component {
             ></input>
           </div>
           <div>
-            <Link to="/register">
+            <label htmlFor="capacity" style={{ padding: 10 }}>
+              Capacity:{" "}
+            </label>
+            <input
+              type="capacity"
+              id="capacity"
+              onChange={this.handleChange}
+            ></input>
+            <label htmlFor="manager" style={{ padding: 10 }}>
+              Manager:{" "}
+            </label>
+            <select id="manager" onChange={this.handleChange}>
+              <option value="4400TC">4400TC</option>
+              <option value="AITC">AITC</option>
+              <option value="ATC">ATC</option>
+              <option value="EZTC">EZTC</option>
+            </select>
+          </div>
+
+          <div>
+            <Link to="/">
               <Button style={this.btnStyle}>Back</Button>
             </Link>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <Button style={this.btnStyle} onClick={this.handleSubmit}>
-              Register
+              Create
             </Button>
           </div>
-          {!this.state.validPassword && <p>Incorrect password input</p>}
-          {!this.state.samePassword && <p>Password doesn't match</p>}
-          {!this.state.validZipcode && <p>Invalid zipcode</p>}
         </Form>
       </div>
     );
   }
 }
 
-export default ManagerRegistration;
+export default CreateTheater;
