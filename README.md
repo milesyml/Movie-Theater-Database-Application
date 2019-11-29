@@ -15,4 +15,4 @@ An data management app for movie system.
 - Change the username and password at the start of app.py to your local mysql server's username and password.
 - Run the script ```data/team36.sql``` followed by ```data/all_procedures.sql``` in mysql workbench.
 - Start the local mysql server.
-- Run ```python app.py``` in front-end folder.
+- Run ```python app.py``` in back-end folder.
