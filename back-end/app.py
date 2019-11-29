@@ -623,7 +623,6 @@ def screen22_get_all():
             cur.execute('SELECT name FROM theater')
             theater = cur.fetchall()
             theater = [i[0] for i in theater]
-            theater.insert(0,'ALL')
             cur.close()
 
             cur = connection.cursor()
@@ -668,7 +667,7 @@ def user_filter_th():
 def user_visit_th():
     if request.method == "POST":
         details = request.json
-        thName, comName, date, user = details['thName'], details['comName'], details['date'], details['userName']
+        thName, comName, date, user = details['thName'], details['comName'], details['date'], details['username']
 
         try:
             cur = connection.cursor()

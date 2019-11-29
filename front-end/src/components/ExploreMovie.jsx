@@ -17,7 +17,8 @@ class ExploreMovie extends Component {
     showNoCardError: false,
     data: [],
     error: null,
-    viewMsg: null
+    viewErr: null,
+    viewOk: null
   };
 
   stickyHeader = {
@@ -74,7 +75,7 @@ class ExploreMovie extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    this.setState({ error: null, viewMsg: null });
+    this.setState({ error: null, viewErr: null, viewOk: null });
     this.filterMovie();
   };
 
@@ -113,7 +114,7 @@ class ExploreMovie extends Component {
   };
 
   viewMovie = () => {
-    this.setState({ error: null, viewMsg: null });
+    this.setState({ error: null, viewErr: null, viewOk: null });
     if (!this.state.selected && this.state.card === "") {
       this.setState({ showEmptyError: true, showNoCardError: true });
     } else if (!this.state.selected) {
@@ -139,17 +140,17 @@ class ExploreMovie extends Component {
           if (!response.ok) {
             throw Error(response.status);
           } else {
-            return response.json();
+            return response;
           }
         })
-        .then(something => this.setState({ viewMsg: "View added." }))
+        .then(something => this.setState({ viewOk: "View added." }))
         .catch(err => {
           if (err.message === "400") {
             this.setState({
-              viewMsg: "Viewing more than 3 movies a day is not permitted."
+              viewErr: "Viewing more than 3 movies a day is not permitted."
             });
           } else {
-            this.setState({ viewMsg: "Internal Server Error." });
+            this.setState({ viewErr: "Internal Server Error." });
           }
         });
     }
@@ -371,8 +372,11 @@ class ExploreMovie extends Component {
           </table>
         </div>
         &nbsp;
-        {this.state.viewMsg && (
-          <div className="alert alert-danger">{this.state.viewMsg}</div>
+        {this.state.viewErr && (
+          <div className="alert alert-danger">{this.state.viewErr}</div>
+        )}
+        {this.state.viewOk && (
+          <div className="alert alert-success">{this.state.viewOk}</div>
         )}
         {this.state.showEmptyError && (
           <div className="alert alert-danger">No row selected</div>
