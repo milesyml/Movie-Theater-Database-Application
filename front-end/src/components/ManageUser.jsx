@@ -49,28 +49,8 @@ class ManageUser extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    this.setState({ error: false });
-    fetch("http://localhost:5000/admin_filter_user", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        username: this.state.username,
-        status: this.state.status,
-        sortBy: "",
-        sortDirection: ""
-      })
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw Error(response.status);
-        } else {
-          return response.json();
-        }
-      })
-      .then(data => this.setState({ data }))
-      .catch(err => this.setState({ error: "Internal Server Error." }));
+    this.setState({ error: null });
+    this.componentDidMount();
   };
 
   handleApproveOrDecline = url => {
