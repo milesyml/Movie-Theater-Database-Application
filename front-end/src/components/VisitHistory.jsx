@@ -1,14 +1,35 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
 
 class VisitHistory extends Component {
   state = {
-    companyName: "",
-    visitDateFrom: null,
-    visitDateTo: null,
+    companyName: "All",
+    visitDateFrom: "",
+    visitDateTo: "",
     allCompanyNames: [],
-    data: []
+    data: [],
+    error: null
   };
+
+  stickyHeader = {
+    position: "sticky",
+    top: 0
+  };
+
+  componentDidMount() {
+    fetch("http://localhost:5000/get_companies", {
+      method: "GET"
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.json();
+        }
+      })
+      .then(data => this.setState({ allCompanyNames: data }))
+      .then(something => this.filterVisitHistory())
+      .catch(err => this.setState({ error: "Internal Server Error." }));
+  }
 
   handleChange = e => {
     this.setState({
@@ -18,17 +39,45 @@ class VisitHistory extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    console.log("Submit");
-    console.log(this.state);
+    this.setState({ error: null });
+    this.filterVisitHistory();
+  };
 
-    // TODO: backend call
+  filterVisitHistory = () => {
+    fetch("http://localhost:5000/user_filter_visitHistory", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: this.props.getCurrentUser(),
+        minDate: this.state.visitDateFrom,
+        maxDate: this.state.visitDateTo,
+        comName: this.state.companyName
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.json();
+        }
+      })
+      .then(data => this.setState({ data }))
+      .catch(err => {
+        if (err.message === "400") {
+          this.setState({ error: "Error with inputs." });
+        } else {
+          this.setState({ error: "Internal Server Error." });
+        }
+      });
   };
 
   renderCompanyNames = () => {
     return this.state.allCompanyNames.map((companyName, index) => {
       return (
-        <option key={index} value={companyName}>
-          {companyName}
+        <option key={index} value={companyName[0]}>
+          {companyName[0]}
         </option>
       );
     });
@@ -91,6 +140,10 @@ class VisitHistory extends Component {
           </form>
         </div>
 
+        {this.state.error && (
+          <div className="alert alert-danger">{this.state.error}</div>
+        )}
+
         <div style={{ height: 400, overflow: "auto" }}>
           <table
             className="table table-bordered table-hover"
@@ -102,10 +155,10 @@ class VisitHistory extends Component {
           >
             <thead className="thead-dark">
               <tr>
-                <th className="sticky-header">Theater</th>
-                <th className="sticky-header">Address</th>
-                <th className="sticky-header">Company</th>
-                <th className="sticky-header">Visit Date</th>
+                <th style={this.stickyHeader}>Theater</th>
+                <th style={this.stickyHeader}>Address</th>
+                <th style={this.stickyHeader}>Company</th>
+                <th style={this.stickyHeader}>Visit Date</th>
               </tr>
             </thead>
             <tbody>{this.renderData()}</tbody>

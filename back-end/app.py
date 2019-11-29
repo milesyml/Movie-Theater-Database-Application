@@ -501,7 +501,7 @@ def screen20_get_all():
     try:
         if request.method == "POST":
             details = request.json
-            user = details['userName']
+            user = details['username']
 
             cur = connection.cursor()
             cur.execute('SELECT name FROM movie')
@@ -562,8 +562,8 @@ def customer_filter_mov():
 def customer_view_movie():
     if request.method == "POST":
         details = request.json
-        cardNum, movName, releaseDate = details['cardNum'], details['movName'], details['releaseDate']
-        thName, comName, playDate = details['thName'], details['comName'], details['playDate']
+        cardNum, movName, releaseDate = details['cardNum'], details['movName'], parser.parse(details['releaseDate'])
+        thName, comName, playDate = details['thName'], details['comName'], parser.parse(details['playDate'])
 
         try:
             cur = connection.cursor()
@@ -574,8 +574,9 @@ def customer_view_movie():
             rv = cur.fetchall()
             if len(rv) >= 3:
                 return make_response("Viewing more than 3 movies a day is not permitted", 400)
-            
+
             cur.callproc('customer_view_mov', [cardNum, movName, releaseDate, thName, comName, playDate])
+            print("pass procedure")
             connection.commit() #Commit insertion
             cur.close()
             return "Viewing Added"
@@ -592,7 +593,7 @@ def customer_view_movie():
 @app.route('/customer_view_history', methods=['POST'])
 def customer_view_history():
     if request.method == "POST":
-        user = request.json['userName']
+        user = request.json['username']
 
         try:
             cur = connection.cursor()
@@ -620,7 +621,6 @@ def screen22_get_all():
             cur.execute('SELECT name FROM theater')
             theater = cur.fetchall()
             theater = [i[0] for i in theater]
-            theater.insert(0,'ALL')
             cur.close()
 
             cur = connection.cursor()
@@ -665,7 +665,7 @@ def user_filter_th():
 def user_visit_th():
     if request.method == "POST":
         details = request.json
-        thName, comName, date, user = details['thName'], details['comName'], details['date'], details['userName']
+        thName, comName, date, user = details['thName'], details['comName'], details['date'], details['username']
 
         try:
             cur = connection.cursor()
@@ -687,7 +687,7 @@ def user_visit_th():
 def user_filter_visitHistory():
     if request.method == "POST":
         details = request.json
-        user, minDate, maxDate, comName = details['userName'], details['minDate'], details['maxDate'], details['comName']
+        user, minDate, maxDate, comName = details['username'], details['minDate'], details['maxDate'], details['comName']
         minDate = none_convert(minDate)
         maxDate = none_convert(maxDate)
 
