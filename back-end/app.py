@@ -501,7 +501,7 @@ def screen20_get_all():
     try:
         if request.method == "POST":
             details = request.json
-            user = details['userName']
+            user = details['username']
 
             cur = connection.cursor()
             cur.execute('SELECT name FROM movie')
@@ -565,6 +565,7 @@ def customer_view_movie():
         cardNum, movName, releaseDate = details['cardNum'], details['movName'], details['releaseDate']
         thName, comName, playDate = details['thName'], details['comName'], details['playDate']
 
+        print(details)
         try:
             cur = connection.cursor()
             cur.execute("""select * from customerviewmovie where creditcardnumber in
@@ -574,8 +575,10 @@ def customer_view_movie():
             rv = cur.fetchall()
             if len(rv) > 3:
                 return make_response("Viewing more than 3 movies a day is not permitted", 400)
-            
+
+            print("pass check")
             cur.callproc('customer_view_mov', [cardNum, movName, releaseDate, thName, comName, playDate])
+            print("pass procedure")
             connection.commit() #Commit insertion
             cur.close()
             return "Viewing Added"

@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
 
 class ExploreMovie extends Component {
   state = {
@@ -8,94 +7,51 @@ class ExploreMovie extends Component {
     city: "",
     state: "All",
     card: "",
-    moviePlayDateFrom: null,
-    moviePlayDateTo: null,
-    allMovieNames: ["abdsf", "Asdfasd", "asdabasdfga"],
-    allCompanyNames: ["asdbas", "Asdfd", "avsdc"],
-    allCards: [
-      "1111000055554444",
-      "1111000055554444",
-      "1111000055554444",
-      "1111000055554444",
-      "1111000055554444"
-    ],
+    moviePlayDateFrom: "",
+    moviePlayDateTo: "",
+    allMovieNames: [],
+    allCompanyNames: [],
+    allCards: [],
     selected: null,
     showEmptyError: false,
     showNoCardError: false,
-    data: [
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "ang",
-        duration: 3,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "bad",
-        duration: 3,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "zxcv",
-        duration: 3,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 2,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 1,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 5,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "Manager",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "User",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "User",
-        playDate: "Approved"
-      },
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "User",
-        playDate: "Declined"
-      }
-    ]
+    data: [],
+    error: null,
+    viewMsg: null
   };
 
   stickyHeader = {
     position: "sticky",
     top: 0
   };
+
+  componentDidMount() {
+    fetch("http://localhost:5000/screen20_get_all", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: this.props.getCurrentUser()
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.json();
+        }
+      })
+      .then(data => {
+        this.setState({
+          allMovieNames: data[0],
+          allCompanyNames: data[1],
+          allCards: data[2]
+        });
+      })
+      .then(something => this.filterMovie())
+      .catch(err => this.setState({ error: "Internal Server Error." }));
+  }
 
   handleChange = e => {
     this.setState({
@@ -118,22 +74,85 @@ class ExploreMovie extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    console.log("Submit");
-    console.log(this.state);
+    this.setState({ error: null, viewMsg: null });
+    this.filterMovie();
+  };
 
-    // TODO: backend call
+  filterMovie = () => {
+    fetch("http://localhost:5000/customer_filter_mov", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        movName: this.state.movieName,
+        comName: this.state.companyName,
+        city: this.state.city,
+        state: this.state.state,
+        minMovPlayDate: this.state.moviePlayDateFrom,
+        maxMovPlayDate: this.state.moviePlayDateTo
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.json();
+        }
+      })
+      .then(data => {
+        this.setState({ data });
+      })
+      .catch(err => {
+        if (err.message === "400") {
+          this.setState({ error: "Error with inputs." });
+        } else {
+          this.setState({ error: "Internal Server Error." });
+        }
+      });
   };
 
   viewMovie = () => {
+    this.setState({ error: null, viewMsg: null });
     if (!this.state.selected && this.state.card === "") {
       this.setState({ showEmptyError: true, showNoCardError: true });
     } else if (!this.state.selected) {
       this.setState({ showEmptyError: true });
     } else if (this.state.card === "") {
       this.setState({ showNoCardError: true });
+    } else {
+      fetch("http://localhost:5000/customer_view_movie", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          cardNum: this.state.card,
+          movName: this.state.selected.movName,
+          releaseDate: this.state.selected.movReleaseDate,
+          playDate: this.state.selected.movPlayDate,
+          thName: this.state.selected.thName,
+          comName: this.state.selected.comName
+        })
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw Error(response.status);
+          } else {
+            return response.json();
+          }
+        })
+        .then(something => this.setState({ viewMsg: "View added." }))
+        .catch(err => {
+          if (err.message === "400") {
+            this.setState({
+              viewMsg: "Viewing more than 3 movies a day is not permitted."
+            });
+          } else {
+            this.setState({ viewMsg: "Internal Server Error." });
+          }
+        });
     }
-
-    // TODO: backend call
   };
 
   selectRow = e => {
@@ -143,7 +162,18 @@ class ExploreMovie extends Component {
 
   renderData = () => {
     return this.state.data.map((movie, index) => {
-      const { movieName, theaterName, address, company, playDate } = movie;
+      const {
+        movName,
+        thName,
+        thStreet,
+        thCity,
+        thState,
+        thZipcode,
+        comName,
+        movPlayDate
+      } = movie;
+      const address =
+        thStreet + ", " + thCity + ", " + thState + " " + thZipcode;
       return (
         <tr key={index}>
           <td>
@@ -154,11 +184,11 @@ class ExploreMovie extends Component {
               onClick={this.selectRow}
             />
           </td>
-          <td>{movieName}</td>
-          <td>{theaterName}</td>
+          <td>{movName}</td>
+          <td>{thName}</td>
           <td>{address}</td>
-          <td>{company}</td>
-          <td>{playDate}</td>
+          <td>{comName}</td>
+          <td>{movPlayDate.match("[0-9]{2}[ ][a-zA-Z]{3}[ ][0-9]{4}")[0]}</td>
         </tr>
       );
     });
@@ -315,6 +345,9 @@ class ExploreMovie extends Component {
             </button>
           </form>
         </div>
+        {this.state.error && (
+          <div className="alert alert-danger">{this.state.error}</div>
+        )}
         <div style={{ height: 400, overflow: "auto" }}>
           <table
             className="table table-bordered table-hover"
@@ -338,6 +371,9 @@ class ExploreMovie extends Component {
           </table>
         </div>
         &nbsp;
+        {this.state.viewMsg && (
+          <div className="alert alert-danger">{this.state.viewMsg}</div>
+        )}
         {this.state.showEmptyError && (
           <div className="alert alert-danger">No row selected</div>
         )}
