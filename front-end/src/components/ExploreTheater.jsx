@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
 
 class ExploreTheater extends Component {
   state = {
@@ -8,85 +7,42 @@ class ExploreTheater extends Component {
     city: "",
     state: "All",
     visitDate: "",
-    allTheaterNames: ["abdsf", "Asdfasd", "asdabasdfga"],
-    allCompanyNames: ["asdbas", "Asdfd", "avsdc"],
+    allTheaterNames: [],
+    allCompanyNames: [],
     selected: null,
     showEmptyError: false,
     showNoVisitDateError: false,
-    data: [
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "ang",
-        duration: 3,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "bad",
-        duration: 3,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "zxcv",
-        duration: 3,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 2,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 1,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 5,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "Manager",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "User",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "User",
-        playDate: "Approved"
-      },
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "User",
-        playDate: "Declined"
-      }
-    ]
+    data: [],
+    error: null,
+    visitErr: null,
+    visitOk: null
   };
 
   stickyHeader = {
     position: "sticky",
     top: 0
   };
+
+  componentDidMount() {
+    fetch("http://localhost:5000/screen22_get_all", {
+      method: "GET"
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.json();
+        }
+      })
+      .then(data => {
+        this.setState({
+          allTheaterNames: data[0],
+          allCompanyNames: data[1]
+        });
+      })
+      .then(something => this.filterTheater())
+      .catch(err => this.setState({ error: "Internal Server Error." }));
+  }
 
   handleChange = e => {
     this.setState({
@@ -96,10 +52,41 @@ class ExploreTheater extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    console.log("Submit");
-    console.log(this.state);
+    this.setState({ error: null, visitOk: null, visitErr: null });
+    this.filterTheater();
+  };
 
-    // TODO: backend call
+  filterTheater = () => {
+    this.setState({ error: null, visitOk: null, visitErr: null });
+    fetch("http://localhost:5000/user_filter_th", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        thName: this.state.theaterName,
+        comName: this.state.companyName,
+        city: this.state.city,
+        state: this.state.state
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.json();
+        }
+      })
+      .then(data => {
+        this.setState({ data });
+      })
+      .catch(err => {
+        if (err.message === "400") {
+          this.setState({ error: "Error with inputs." });
+        } else {
+          this.setState({ error: "Internal Server Error." });
+        }
+      });
   };
 
   handleVisitDateChange = e => {
@@ -116,9 +103,29 @@ class ExploreTheater extends Component {
       this.setState({ showEmptyError: true });
     } else if (this.state.visitDate === "") {
       this.setState({ showNoVisitDateError: true });
+    } else {
+      fetch("http://localhost:5000/user_visit_th", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          thName: this.state.selected.theater,
+          comName: this.state.selected.company,
+          date: this.state.visitDate,
+          username: this.props.getCurrentUser()
+        })
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw Error(response.status);
+          } else {
+            return response;
+          }
+        })
+        .then(something => this.setState({ visitOk: "Visit added." }))
+        .catch(err => this.setState({ visitErr: "Internal Server Error." }));
     }
-
-    // TODO: backend call
   };
 
   selectRow = e => {
@@ -127,8 +134,8 @@ class ExploreTheater extends Component {
   };
 
   renderData = () => {
-    return this.state.data.map((theater, index) => {
-      const { theaterName, address, company } = theater;
+    return this.state.data.map((th, index) => {
+      const { theater, address, company } = th;
       return (
         <tr key={index}>
           <td>
@@ -139,7 +146,7 @@ class ExploreTheater extends Component {
               onClick={this.selectRow}
             />
           </td>
-          <td>{theaterName}</td>
+          <td>{theater}</td>
           <td>{address}</td>
           <td>{company}</td>
         </tr>
@@ -268,6 +275,9 @@ class ExploreTheater extends Component {
             </button>
           </form>
         </div>
+        {this.state.error && (
+          <div className="alert alert-danger">{this.state.error}</div>
+        )}
         <div style={{ height: 400, overflow: "auto" }}>
           <table
             className="table table-bordered table-hover"
@@ -289,9 +299,16 @@ class ExploreTheater extends Component {
           </table>
         </div>
         &nbsp;
+        {this.state.visitErr && (
+          <div className="alert alert-danger">{this.state.visitErr}</div>
+        )}
+        {this.state.visitOk && (
+          <div className="alert alert-success">{this.state.visitOk}</div>
+        )}
         {this.state.showEmptyError && (
           <div className="alert alert-danger">No row selected</div>
         )}
+        &nbsp;
         {this.state.showNoVisitDateError && (
           <div className="alert alert-danger">No visit date selected</div>
         )}

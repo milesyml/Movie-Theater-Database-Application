@@ -26,7 +26,6 @@ import AdminCustomerFunctionality from "./components/AdminCustomerFunctionality"
 import ManagerCustomerFunctionality from "./components/ManagerCustomerFunctionality";
 import UserFunctionality from "./components/UserFunctionality";
 
-
 class App extends Component {
   state = { username: "" };
 
@@ -83,19 +82,9 @@ class App extends Component {
               path="/adminOnlyFunctionality"
               component={AdminOnlyFunctionality}
             ></Route>
-            <Route path="/manageUser" component={ManageUser} />
             <Route path="/createTheater" component={CreateTheater}></Route>
             <Route path="/createMovie" component={CreateMovie}></Route>
             <Route path="/scheduleMovie" component={ScheduleMovie}></Route>
-
-              render={props => (
-                <AdminOnlyFunctionality
-                  {...props}
-                  getCurrentUser={this.getCurrentUser}
-                />
-              )}
-            />
-
             <Route
               path="/adminCustomerFunctionality"
               render={props => (

@@ -64,6 +64,7 @@ class TheaterOverview extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
+    this.setState({ error: null });
     this.componentDidMount();
   };
 
@@ -74,7 +75,6 @@ class TheaterOverview extends Component {
   renderData = () => {
     return this.state.data.map((movie, index) => {
       const { movName, movDuration, movReleaseDate, movPlayDate } = movie;
-      console.log(movReleaseDate);
       return (
         <tr key={index}>
           <td>{movName}</td>
@@ -187,6 +187,10 @@ class TheaterOverview extends Component {
             </button>
           </form>
         </div>
+
+        {this.state.error && (
+          <div className="alert alert-danger">{this.state.error}</div>
+        )}
 
         <div style={{ height: 400, overflow: "auto" }}>
           <table
