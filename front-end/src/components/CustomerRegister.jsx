@@ -16,7 +16,8 @@ class CustomerRegistration extends Component {
     tempCardNumber: "",
     validPassword: true,
     samePassword: true,
-    validCreditCard: true
+    validCreditCard: true,
+    error: null
   };
 
   handleChange = e => {
@@ -37,7 +38,110 @@ class CustomerRegistration extends Component {
         this.state.confirmPassword
       )
     });
+    if (
+      this.state.firstName == "" ||
+      this.state.lastName == "" ||
+      this.state.username == "" ||
+      !Validation.isPassword(this.state.password) ||
+      !Validation.isSame(this.state.password, this.state.confirmPassword) ||
+      this.state.my_list.length == 0
+    ) {
+      console.log("error");
+      return;
+    }
+
+    // var apiRequest1 = fetch("http://localhost:5000/customer_only_register", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json"
+    //   },
+    //   body: JSON.stringify({
+    //     userName: this.state.username,
+    //     password: this.state.password,
+    //     firstName: this.state.firstName,
+    //     lastName: this.state.lastName
+    //   })
+    // }).then(function(response) {
+    //   return response.json();
+    // });
+    // var apiRequest2 = fetch("http://localhost:5000/add_credit", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json"
+    //   },
+    //   body: JSON.stringify({
+    //     userName: this.state.username,
+    //     cards: this.state.my_list
+    //   })
+    // }).then(function(response) {
+    //   return response.json();
+    // });
+    // var combinedData = { apiRequest1: {}, apiRequest2: {} };
+
+    // Promise.all([apiRequest1, apiRequest2]).then(function(values) {
+    //   combinedData["apiRequest1"] = values[0];
+    //   combinedData["apiRequest2"] = values[1];
+    //   return combinedData;
+    // });
+
+    // fetch("http://localhost:5000/customer_only_register", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json"
+    //   },
+    //   body: JSON.stringify({
+    //     userName: this.state.username,
+    //     password: this.state.password,
+    //     firstName: this.state.firstName,
+    //     lastName: this.state.lastName
+    //   })
+    // })
+    //   .then(response => {
+    //     console.log(response.status);
+    //     console.log("debug");
+    //     if (response.status != "200") {
+    //       throw Error(response.status);
+    //     } else {
+    //       // this.props.history.push("/");
+    //       return response.json();
+    //     }
+    //   })
+    //   .catch(err => {
+    //     if (err.message === "400") {
+    //       this.setState({ error: "Username Exists!" });
+    //     } else {
+    //       this.setState({ error: "Internal Server." });
+    //     }
+    //   });
+
+    // fetch("http://localhost:5000/add_credit", {
+    // method: "POST",
+    // headers: {
+    //   "Content-Type": "application/json"
+    // },
+    // body: JSON.stringify({
+    //   userName: this.state.username,
+    //   cards: this.state.my_list
+    // })
+    // })
+    //   .then(response => {
+    //     console.log(response.status);
+    //     if (response.status != "200") {
+    //       throw Error(response.status);
+    //     } else {
+    //       this.props.history.push("/");
+    //       return response.json();
+    //     }
+    //   })
+    //   .catch(err => {
+    //     if (err.message === "400") {
+    //       this.setState({ error: "Input error" });
+    //     } else {
+    //       this.setState({ error: "Internal Server Error." });
+    //     }
+    //   });
   };
+
   handleAddCard = () => {
     if (this.state.my_list.length < this.state.max_number) {
       if (this.state.tempCardNumber != "") {
@@ -135,6 +239,12 @@ class CustomerRegistration extends Component {
             handleAddCard={this.handleAddCard}
             handleChange={this.handleChange}
           ></CreditCardList>
+
+          {this.state.error && (
+            <div className="alert alert-danger" style={{ marginTop: 10 }}>
+              {this.state.error}
+            </div>
+          )}
 
           <div>
             <Link to="/register">
