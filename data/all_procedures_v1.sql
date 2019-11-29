@@ -152,7 +152,7 @@ DELIMITER ;
 
 
 -- screen 14: admin filter company
-DROP PROCEDURE IF EXISTS admin_filter_company
+DROP PROCEDURE IF EXISTS admin_filter_company;
 DELIMITER $$
 CREATE PROCEDURE `admin_filter_company`(IN i_comName VARCHAR(50), IN i_minCity INT, IN i_maxCity INT, IN i_minTheater INT, IN i_maxTheater INT, i_minEmployee INT, IN i_maxEmployee INT, IN i_sortBy ENUM('comName', 'numCityCover', 'numTheater', 'numEmployee', ''), IN i_sortDirection ENUM('ASC', 'DESC', ''))
 BEGIN
@@ -160,11 +160,14 @@ BEGIN
     CREATE TABLE AdFilterCom
 	SELECT A.comName, numCityCover, numTheater, numEmployee
 	FROM
-		(SELECT company.Name AS comName, COUNT(DISTINCT City, State) AS numCityCover, COUNT(theater.Name) AS numTheater
-		FROM company
-		LEFT OUTER JOIN Theater
-		ON (i_comName = 'ALL' OR company.Name = i_comName) AND company.Name = theater.Company
-		GROUP BY company.Name
+		(SELECT C.comName, COUNT(DISTINCT City, State) AS numCityCover, COUNT(theater.Name) AS numTheater
+		FROM 
+			(SELECT company.Name AS comName
+			FROM company
+			WHERE i_comName = 'ALL' OR company.Name = i_comName) AS C
+		LEFT OUTER JOIN theater
+		ON C.comName = theater.Company
+		GROUP BY C.comName
 		HAVING 
 		(i_minCity IS NULL OR COUNT(DISTINCT City, State) >=i_minCity) AND
 		(i_maxCity IS NULL OR  COUNT(DISTINCT City, State) <= i_maxCity ) AND
@@ -205,7 +208,7 @@ END$$
 DELIMITER ;
 
 -- screen 16: admin view company detail (Employee)
-DROP PROCEDURE IF EXISTS admin_view_comDetail_emp
+DROP PROCEDURE IF EXISTS admin_view_comDetail_emp;
 DELIMITER $$
 CREATE PROCEDURE `admin_view_comDetail_emp`(IN i_comName VARCHAR(50))
 BEGIN
@@ -233,7 +236,7 @@ DELIMITER ;
 
 
 -- screen 17: admin create movie
-DROP PROCEDURE IF EXISTS admin_create_mov
+DROP PROCEDURE IF EXISTS admin_create_mov;
 DELIMITER $$
 CREATE PROCEDURE `admin_create_mov`(IN i_movName VARCHAR(50), IN i_movDuration INT, IN i_movReleaseDate DATE)
 BEGIN
@@ -243,33 +246,44 @@ END$$
 DELIMITER ;
 
 -- screen 18: manager filter theater
+-- error here, table should be empty when a manager doesn't manage theater yet.
+-- Is the current version correct???
 DROP PROCEDURE IF EXISTS manager_filter_th;
 DELIMITER $$
 CREATE PROCEDURE `manager_filter_th`(IN i_manUsername VARCHAR(50), IN i_movName VARCHAR(50), IN i_minMovDuration INT, IN i_maxMovDuration INT, IN i_minMovReleaseDate Date, IN i_maxMovReleaseDate Date, IN i_minMovPlayDate Date, IN  i_maxMovPlayDate Date, IN i_includeNotPlayed Boolean)
 BEGIN
     DROP TABLE IF EXISTS ManFilterTh;
 	CREATE TABLE ManFilterTh
-    SELECT movie.Name as movName, Duration AS movDuration, movie.ReleaseDate as movReleaseDate, movPlayDate
-	FROM movie
-	LEFT OUTER JOIN
-		(SELECT Movie AS movName, ReleaseDate AS movReleaseDate, PlayDate AS movPlayDate
-		FROM
-			(SELECT NAME AS Theater, Company
-			FROM theater
-			WHERE ManagerUserName = i_manUsername) AS A
-		LEFT OUTER JOIN movieplay
-		ON A.Theater = movieplay.Theater AND A.Company = movieplay.Company
-		WHERE 
-			(i_movName ="" OR Locate(i_movName, Movie) > 0) AND
-			(i_minMovReleaseDate IS NULL OR movieplay.ReleaseDate >= i_minMovReleaseDate) AND 
-			(i_maxMovReleaseDate IS NULL OR movieplay.ReleaseDate <= i_maxMovReleaseDate) AND
-			(i_minMovPlayDate IS NULL OR PlayDate >= i_minMovPlayDate) AND 
-			(i_maxMovPlayDate IS NULL OR PlayDate <= i_maxMovPlayDate))
-		AS B
-	ON movie.Name = B.movName  AND movie.ReleaseDate = B.movReleaseDate
-	WHERE (i_minMovDuration IS NULL OR Duration >= i_minMovDuration) AND
-		  (i_maxMovDuration IS NULL OR Duration <= i_maxMovDuration) AND
-		  ((i_includeNotPlayed IS NULL OR i_includeNotPlayed = FALSE) OR (movPlayDate is NULL));
+	SELECT movName, movDuration, movReleaseDate, movPlayDate
+	FROM
+		(SELECT movie.Name as movName, Duration AS movDuration, movie.ReleaseDate as movReleaseDate, movPlayDate
+		FROM movie
+		LEFT OUTER JOIN
+			(SELECT Movie AS movName, ReleaseDate AS movReleaseDate, PlayDate AS movPlayDate
+			FROM
+				(SELECT NAME AS Theater, Company
+				FROM theater
+				WHERE ManagerUserName = i_manUsername) AS A
+			JOIN movieplay
+			ON A.Theater = movieplay.Theater AND A.Company = movieplay.Company
+			WHERE 
+				(i_movName ="" OR Locate(i_movName, Movie) > 0) AND
+				(i_minMovReleaseDate IS NULL OR movieplay.ReleaseDate >= i_minMovReleaseDate) AND 
+				(i_maxMovReleaseDate IS NULL OR movieplay.ReleaseDate <= i_maxMovReleaseDate) AND
+				(i_minMovPlayDate IS NULL OR PlayDate >= i_minMovPlayDate) AND 
+				(i_maxMovPlayDate IS NULL OR PlayDate <= i_maxMovPlayDate))
+			AS B
+		ON movie.Name = B.movName  AND movie.ReleaseDate = B.movReleaseDate
+		WHERE (i_minMovDuration IS NULL OR Duration >= i_minMovDuration) AND
+			  (i_maxMovDuration IS NULL OR Duration <= i_maxMovDuration) AND
+			  ((i_includeNotPlayed IS NULL OR i_includeNotPlayed = FALSE) OR (movPlayDate is NULL))) 
+	AS C
+	JOIN 
+		(SELECT NAME AS Theater, Company
+		FROM theater
+		WHERE ManagerUserName = i_manUsername)
+	AS D
+	ON TRUE;
 END$$
 DELIMITER ;
 
@@ -310,7 +324,7 @@ BEGIN
 END$$
 DELIMITER ;
 
--- screen 20: customer filter movie [How to handle the logical constraint: customer can at most watch 3 movies per day]
+-- screen 20: customer view movie [How to handle the logical constraint: customer can at most watch 3 movies per day]
 DROP PROCEDURE IF EXISTS customer_view_mov;
 DELIMITER $$
 CREATE PROCEDURE `customer_view_mov`(IN i_creditCardNum CHAR(16), IN i_movName VARCHAR(50), IN i_movReleaseDate Date, IN i_thName VARCHAR(50), IN i_comName VARCHAR(50), IN i_movPlayDate Date)

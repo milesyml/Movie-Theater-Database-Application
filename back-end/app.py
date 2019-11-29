@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify, make_response
+from flask_cors import CORS
 import mysql.connector
 from mysql.connector import Error
 from dateutil import parser
 
 app = Flask(__name__)
+CORS(app)
 
 #SQL Server Details Here
 connection = mysql.connector.connect(host="localhost",
@@ -63,7 +65,8 @@ def get_movies():
 def user_login():
     if request.method == "POST":
         details = request.json
-        user, pw = details['userName'], details['password']
+        user, pw = details['username'], details['password']
+
 
         try:
             cur = connection.cursor()
@@ -77,7 +80,7 @@ def user_login():
                 
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
-            return items
+            return items[0]
         except mysql.connector.IntegrityError as error:
             cur.close()
             msg = "Input Error: {}".format(error)
@@ -209,7 +212,7 @@ def manager_customer_register():
 def admin_filter_user():
     if request.method == "POST":
         details = request.json
-        user, status = details['userName'], details['status']
+        user, status = details['username'], details['status']
         sortBy, sortDirection = details['sortBy'], details['sortDirection']
 
         try:
@@ -234,7 +237,7 @@ def admin_filter_user():
 @app.route('/admin_approve_user', methods=['POST'])
 def approve_user():
     if request.method == "POST":
-        user = request.json['userName']
+        user = request.json['username']
 
         try:
             cur = connection.cursor()
@@ -255,7 +258,7 @@ def approve_user():
 @app.route('/admin_decline_user', methods=['POST'])
 def decline_user():
     if request.method == "POST":
-        user = request.json['userName']
+        user = request.json['username']
 
         try:
             cur = connection.cursor()
@@ -381,6 +384,8 @@ def admin_view_comDetail_combined():
             cur.callproc('admin_view_comDetail_emp', [comName])
             cur.execute('select concat(empfirstname, " ", emplastname) from adcomdetailemp')
             emp = cur.fetchall()
+            if not emp:
+                return make_response("Company not found", 400)
             emp = [i[0] for i in emp]
             cur.close()
 
@@ -502,7 +507,6 @@ def screen20_get_all():
             cur.execute('SELECT name FROM movie')
             movies = cur.fetchall()
             movies = [i[0] for i in movies]
-            movies.insert(0,'ALL')
             cur.close()            
 
             cur = connection.cursor()
@@ -528,7 +532,7 @@ def customer_filter_mov():
     if request.method == "POST":
         details = request.json
         movName, comName, city, state = details['movName'], details['comName'], details['city'], details['state']
-        minMovPlayDate, maxMovPlayDate = none_convert(details['minMovReleaseDate']), none_convert(details['maxMovReleaseDate'])
+        minMovPlayDate, maxMovPlayDate = none_convert(details['minMovPlayDate']), none_convert(details['maxMovPlayDate'])
 
         if minMovPlayDate and maxMovPlayDate:
             if parser.parse(minMovPlayDate) > parser.parse(maxMovPlayDate):
@@ -683,7 +687,7 @@ def user_visit_th():
 def user_filter_visitHistory():
     if request.method == "POST":
         details = request.json
-        user, minDate, maxDate = details['userName'], details['minDate'], details['maxDate']
+        user, minDate, maxDate, comName = details['userName'], details['minDate'], details['maxDate'], details['comName']
         minDate = none_convert(minDate)
         maxDate = none_convert(maxDate)
 
@@ -693,7 +697,10 @@ def user_filter_visitHistory():
         try:
             cur = connection.cursor()
             cur.callproc('user_filter_visitHistory', [user, minDate, maxDate])
-            cur.execute("select thName as theater, concat(thStreet,', ',thCity,', ',thState,' ',thZipcode) as address, comName as company, visitDate from uservisithistory")
+            if comName == 'ALL':
+                cur.execute("select thName as theater, concat(thStreet,', ',thCity,', ',thState,' ',thZipcode) as address, comName as company, visitDate from uservisithistory")
+            else:    
+                cur.execute("select thName as theater, concat(thStreet,', ',thCity,', ',thState,' ',thZipcode) as address, comName as company, visitDate from uservisithistory where comName = '{}'".format(comName))
             rv = cur.fetchall()
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()

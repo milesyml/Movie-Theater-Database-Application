@@ -72,21 +72,19 @@ Error occured: {error message}
 
 @input example
 {
-	"userName": "calcwizard",
+	"username": "calcwizard",
 	"password":"222222222"
 }
 
 @success example
 HTTP/1.1 200 OK
-[
-  {
+{
     "isAdmin": 0,
     "isCustomer": 1,
     "isManager": 0,
     "status": "approved",
     "username": "calcwizard"
   }
-]
 
 @error example
 HTTP/1.1 400 BAD REQUEST
@@ -627,8 +625,8 @@ Failed to execute stored procedure: {}
 	"comName": "ALL",
 	"city": "",
 	"state": "ALL",
-	"minMovReleaseDate": "",
-	"maxMovReleaseDate": ""
+	"minMovPlayDate": "",
+	"maxMovPlayDate": ""
 }
 
 @success example
@@ -667,7 +665,7 @@ Failed to execute stored procedure: {}
 
 
 
-### Screen 20.2: Get customer's cards
+### Screen 20.2: Get Movie Names, Company Names and Customer's Cards
 @api {POST} '/screen20_get_all'
 
 @input example
@@ -679,7 +677,6 @@ Failed to execute stored procedure: {}
 HTTP/1.1 200 OK
 [
   [
-    "ALL",
     "4400 The Movie",
     "Avengers: Endgame",
     "Calculus Returns: A ML Story",
@@ -748,18 +745,39 @@ Failed to execute stored procedure: {}
 
 @input example
 {
-	"userName": "calcultron2"
+	"userName": "georgep"
 }
 
 @success example
 HTTP/1.1 200 OK
 [
   {
+    "comName": "EZ Theater Company",
+    "creditCardNum": "1111111111111100",
+    "movName": "How to Train Your Dragon",
+    "movPlayDate": "Thu, 25 Mar 2010 00:00:00 GMT",
+    "thName": "Star Movies"
+  },
+  {
     "comName": "4400 Theater Company",
-    "creditCardNum": "1111111100000000",
-    "movName": "4400 The Movie",
-    "movPlayDate": "Tue, 26 Nov 2019 00:00:00 GMT",
-    "thName": "Theater 1"
+    "creditCardNum": "1111111111111111",
+    "movName": "How to Train Your Dragon",
+    "movPlayDate": "Fri, 02 Apr 2010 00:00:00 GMT",
+    "thName": "Cinema Star"
+  },
+  {
+    "comName": "EZ Theater Company",
+    "creditCardNum": "1111111111111111",
+    "movName": "How to Train Your Dragon",
+    "movPlayDate": "Mon, 22 Mar 2010 00:00:00 GMT",
+    "thName": "Main Movies"
+  },
+  {
+    "comName": "EZ Theater Company",
+    "creditCardNum": "1111111111111111",
+    "movName": "How to Train Your Dragon",
+    "movPlayDate": "Tue, 23 Mar 2010 00:00:00 GMT",
+    "thName": "Main Movies"
   }
 ]
 
@@ -874,7 +892,8 @@ Failed to execute stored procedure: {}
 {
 	"userName": "calcwizard",
 	"minDate": "",
-	"maxDate": ""
+	"maxDate": "",
+	"comName": "EZ Theater Company"
 }
 
 
@@ -892,12 +911,6 @@ HTTP/1.1 200 OK
     "company": "EZ Theater Company",
     "theater": "Star Movies",
     "visitDate": "Thu, 25 Mar 2010 00:00:00 GMT"
-  },
-  {
-    "address": "314 Pi St, Pallet Town, KS 31415",
-    "company": "AI Theater Company",
-    "theater": "ML Movies",
-    "visitDate": "Sat, 20 Mar 2010 00:00:00 GMT"
   }
 ]
 
