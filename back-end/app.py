@@ -9,8 +9,8 @@ CORS(app)
 
 #SQL Server Details Here
 connection = mysql.connector.connect(host="localhost",
-                                     user="test",
-                                     password="password1234",
+                                     user="root",
+                                     password="",
                                      database="team36")
 
 def none_convert(input):
@@ -432,12 +432,12 @@ def admin_create_mov():
 def manager_filter_th():
     if request.method == "POST":
         details = request.json
+        print(details)
         manUsername, movName = details['manUsername'], details['movName']
         minMovDuration, maxMovDuration = none_convert(details['minMovDuration']), none_convert(details['maxMovDuration'])
         minMovReleaseDate, maxMovReleaseDate = none_convert(details['minMovReleaseDate']), none_convert(details['maxMovReleaseDate'])
         minMovPlayDate, maxMovPlayDate = none_convert(details['minMovPlayDate']), none_convert(details['maxMovPlayDate'])
         includeNotPlayed = none_convert(details['includeNotPlayed'])
-
 
         if minMovDuration and maxMovDuration:
             if minMovDuration > maxMovDuration:

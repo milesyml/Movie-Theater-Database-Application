@@ -1,90 +1,60 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
 
 class TheaterOverview extends Component {
   state = {
     movieName: "",
-    movieDurationFrom: null,
-    movieDurationTo: null,
-    movieReleaseDateFrom: null,
-    movieReleaseDateTo: null,
-    moviePlayDateFrom: null,
-    moviePlayDateTo: null,
-    onlyIncludeNotPlayed: false,
-    data: [
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "ang",
-        duration: 3,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "bad",
-        duration: 3,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "zxcv",
-        duration: 3,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 2,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 1,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 5,
-        releaseData: "Admin",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "Manager",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "User",
-        playDate: "Pending"
-      },
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "User",
-        playDate: "Approved"
-      },
-      {
-        movieName: "minglong",
-        duration: 3,
-        releaseData: "User",
-        playDate: "Declined"
-      }
-    ]
+    movieDurationFrom: "",
+    movieDurationTo: "",
+    movieReleaseDateFrom: "",
+    movieReleaseDateTo: "",
+    moviePlayDateFrom: "",
+    moviePlayDateTo: "",
+    onlyIncludeNotPlayed: 0,
+    data: [],
+    error: null
   };
 
   stickyHeader = {
     position: "sticky",
     top: 0
   };
+
+  componentDidMount() {
+    fetch("http://localhost:5000/manager_filter_th", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        manUsername: this.props.getCurrentUser(),
+        movName: this.state.movieName,
+        minMovDuration: this.state.movieDurationFrom,
+        maxMovDuration: this.state.movieDurationTo,
+        minMovReleaseDate: this.state.movieReleaseDateFrom,
+        maxMovReleaseDate: this.state.movieReleaseDateTo,
+        minMovPlayDate: this.state.moviePlayDateFrom,
+        maxMovPlayDate: this.state.moviePlayDateTo,
+        includeNotPlayed: this.state.onlyIncludeNotPlayed
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.json();
+        }
+      })
+      .then(data => {
+        this.setState({ data });
+      })
+      .catch(err => {
+        if (err.message === "400") {
+          this.setState({ error: "Error with inputs." });
+        } else {
+          this.setState({ error: "Internal Server Error." });
+        }
+      });
+  }
 
   handleChange = e => {
     this.setState({
@@ -94,25 +64,29 @@ class TheaterOverview extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    console.log("Submit");
-    console.log(this.state);
-
-    // TODO: backend call
+    this.componentDidMount();
   };
 
   toggleCheckbox = e => {
-    this.setState({ [e.target.id]: !this.state[e.target.id] });
+    this.setState({ [e.target.id]: !this.state[e.target.id] ? 1 : 0 });
   };
 
   renderData = () => {
     return this.state.data.map((movie, index) => {
-      const { movieName, duration, releaseData, playDate } = movie;
+      const { movName, movDuration, movReleaseDate, movPlayDate } = movie;
+      console.log(movReleaseDate);
       return (
         <tr key={index}>
-          <td>{movieName}</td>
-          <td>{duration}</td>
-          <td>{releaseData}</td>
-          <td>{playDate}</td>
+          <td>{movName}</td>
+          <td>{movDuration}</td>
+          <td>
+            {movReleaseDate.match("[0-9]{2}[ ][a-zA-Z]{3}[ ][0-9]{4}")[0]}
+          </td>
+          <td>
+            {movPlayDate
+              ? movPlayDate.match("[0-9]{2}[ ][a-zA-Z]{3}[ ][0-9]{4}")[0]
+              : ""}
+          </td>
         </tr>
       );
     });
