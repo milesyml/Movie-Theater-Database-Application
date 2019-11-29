@@ -10,7 +10,8 @@ class UserRegistration extends Component {
     password: "",
     confirmPassword: "",
     validPassword: true,
-    samePassword: true
+    samePassword: true,
+    error: null
   };
 
   handleChange = e => {
@@ -31,6 +32,47 @@ class UserRegistration extends Component {
         this.state.confirmPassword
       )
     });
+
+    if (
+      this.state.firstName == "" ||
+      this.state.lastName == "" ||
+      this.state.username == "" ||
+      !Validation.isPassword(this.state.password) ||
+      !Validation.isSame(this.state.password, this.state.confirmPassword)
+    ) {
+      console.log("error");
+      return;
+    }
+
+    fetch("http://localhost:5000/user_register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userName: this.state.username,
+        password: this.state.password,
+        firstName: this.state.firstName,
+        lastName: this.state.lastName
+      })
+    })
+      .then(response => {
+        console.log(response.status);
+        if (response.status != "200") {
+          throw Error(response.status);
+        } else {
+          this.props.history.push("/");
+          return response.json();
+        }
+      })
+
+      .catch(err => {
+        if (err.message === "400") {
+          this.setState({ error: "Username Exists!" });
+        } else {
+          this.setState({ error: "Internal Server Error." });
+        }
+      });
   };
 
   style = {
@@ -99,6 +141,11 @@ class UserRegistration extends Component {
               onChange={this.handleChange}
             ></input>
           </div>
+          {this.state.error && (
+            <div className="alert alert-danger" style={{ marginTop: 10 }}>
+              {this.state.error}
+            </div>
+          )}
           <div>
             <Link to="/register">
               <Button style={this.btnStyle}>Back</Button>
