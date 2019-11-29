@@ -9,8 +9,8 @@ CORS(app)
 
 #SQL Server Details Here
 connection = mysql.connector.connect(host="localhost",
-                                     user="root",
-                                     password="",
+                                     user="test",
+                                     password="password1234",
                                      database="team36")
 
 def none_convert(input):
@@ -572,7 +572,7 @@ def customer_view_movie():
                         (select username from creditcard where creditcardnumber = '{}'))
                         and viewdate = '{}';""".format(cardNum,playDate))
             rv = cur.fetchall()
-            if len(rv) > 3:
+            if len(rv) >= 3:
                 return make_response("Viewing more than 3 movies a day is not permitted", 400)
             
             cur.callproc('customer_view_mov', [cardNum, movName, releaseDate, thName, comName, playDate])
