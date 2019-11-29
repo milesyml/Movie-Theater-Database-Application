@@ -265,16 +265,15 @@ BEGIN
 				FROM theater
 				WHERE ManagerUserName = i_manUsername) AS A
 			JOIN movieplay
-			ON A.Theater = movieplay.Theater AND A.Company = movieplay.Company
-			WHERE 
-				(i_movName ="" OR Locate(i_movName, Movie) > 0) AND
-				(i_minMovReleaseDate IS NULL OR movieplay.ReleaseDate >= i_minMovReleaseDate) AND 
-				(i_maxMovReleaseDate IS NULL OR movieplay.ReleaseDate <= i_maxMovReleaseDate) AND
-				(i_minMovPlayDate IS NULL OR PlayDate >= i_minMovPlayDate) AND 
-				(i_maxMovPlayDate IS NULL OR PlayDate <= i_maxMovPlayDate))
+			ON A.Theater = movieplay.Theater AND A.Company = movieplay.Company)
 			AS B
 		ON movie.Name = B.movName  AND movie.ReleaseDate = B.movReleaseDate
-		WHERE (i_minMovDuration IS NULL OR Duration >= i_minMovDuration) AND
+		WHERE (i_movName ="" OR Locate(i_movName, movie.Name) > 0) AND
+		      (i_minMovReleaseDate IS NULL OR movie.ReleaseDate >= i_minMovReleaseDate) AND 
+			  (i_maxMovReleaseDate IS NULL OR movie.ReleaseDate <= i_maxMovReleaseDate) AND
+			  (i_minMovPlayDate IS NULL OR movPlayDate >= i_minMovPlayDate) AND 
+			  (i_maxMovPlayDate IS NULL OR movPlayDate <= i_maxMovPlayDate) AND
+			  (i_minMovDuration IS NULL OR Duration >= i_minMovDuration) AND
 			  (i_maxMovDuration IS NULL OR Duration <= i_maxMovDuration) AND
 			  ((i_includeNotPlayed IS NULL OR i_includeNotPlayed = FALSE) OR (movPlayDate is NULL))) 
 	AS C
