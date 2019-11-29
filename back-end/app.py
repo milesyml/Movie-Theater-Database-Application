@@ -212,7 +212,7 @@ def manager_customer_register():
 def admin_filter_user():
     if request.method == "POST":
         details = request.json
-        user, status = details['userName'], details['status']
+        user, status = details['username'], details['status']
         sortBy, sortDirection = details['sortBy'], details['sortDirection']
 
         try:
@@ -237,7 +237,7 @@ def admin_filter_user():
 @app.route('/admin_approve_user', methods=['POST'])
 def approve_user():
     if request.method == "POST":
-        user = request.json['userName']
+        user = request.json['username']
 
         try:
             cur = connection.cursor()
@@ -258,7 +258,7 @@ def approve_user():
 @app.route('/admin_decline_user', methods=['POST'])
 def decline_user():
     if request.method == "POST":
-        user = request.json['userName']
+        user = request.json['username']
 
         try:
             cur = connection.cursor()
@@ -384,6 +384,8 @@ def admin_view_comDetail_combined():
             cur.callproc('admin_view_comDetail_emp', [comName])
             cur.execute('select concat(empfirstname, " ", emplastname) from adcomdetailemp')
             emp = cur.fetchall()
+            if not emp:
+                return make_response("Company not found", 400)
             emp = [i[0] for i in emp]
             cur.close()
 

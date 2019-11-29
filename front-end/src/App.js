@@ -10,6 +10,9 @@ import UserRegistration from "./components/UserRegister";
 import CustomerRegistration from "./components/CustomerRegister";
 import ManagerRegistration from "./components/ManagerRegister";
 import ManagerCustomerRegistration from "./components/ManagerCustomerRegister";
+import CreateTheater from "./components/CreateTheater";
+import CreateMovie from "./components/CreateMovie";
+import ScheduleMovie from "./components/ScheduleMovie";
 import ManageCompany from "./components/ManageCompany";
 import CompanyDetail from "./components/CompanyDetail";
 import TheaterOverview from "./components/TheaterOverview";
@@ -22,6 +25,7 @@ import VisitHistory from "./components/VisitHistory";
 import AdminCustomerFunctionality from "./components/AdminCustomerFunctionality";
 import ManagerCustomerFunctionality from "./components/ManagerCustomerFunctionality";
 import UserFunctionality from "./components/UserFunctionality";
+
 
 class App extends Component {
   state = { username: "" };
@@ -77,6 +81,13 @@ class App extends Component {
             </Route>
             <Route
               path="/adminOnlyFunctionality"
+              component={AdminOnlyFunctionality}
+            ></Route>
+            <Route path="/manageUser" component={ManageUser} />
+            <Route path="/createTheater" component={CreateTheater}></Route>
+            <Route path="/createMovie" component={CreateMovie}></Route>
+            <Route path="/scheduleMovie" component={ScheduleMovie}></Route>
+
               render={props => (
                 <AdminOnlyFunctionality
                   {...props}
@@ -190,6 +201,7 @@ class App extends Component {
                 <VisitHistory {...props} getCurrentUser={this.getCurrentUser} />
               )}
             />
+
             <Route component={NotFound} />
           </Switch>
         </div>
