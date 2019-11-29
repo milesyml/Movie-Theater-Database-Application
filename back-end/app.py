@@ -562,10 +562,9 @@ def customer_filter_mov():
 def customer_view_movie():
     if request.method == "POST":
         details = request.json
-        cardNum, movName, releaseDate = details['cardNum'], details['movName'], details['releaseDate']
-        thName, comName, playDate = details['thName'], details['comName'], details['playDate']
+        cardNum, movName, releaseDate = details['cardNum'], details['movName'], parser.parse(details['releaseDate'])
+        thName, comName, playDate = details['thName'], details['comName'], parser.parse(details['playDate'])
 
-        print(details)
         try:
             cur = connection.cursor()
             cur.execute("""select * from customerviewmovie where creditcardnumber in
@@ -573,10 +572,9 @@ def customer_view_movie():
                         (select username from creditcard where creditcardnumber = '{}'))
                         and viewdate = '{}';""".format(cardNum,playDate))
             rv = cur.fetchall()
-            if len(rv) > 3:
+            if len(rv) >= 3:
                 return make_response("Viewing more than 3 movies a day is not permitted", 400)
 
-            print("pass check")
             cur.callproc('customer_view_mov', [cardNum, movName, releaseDate, thName, comName, playDate])
             print("pass procedure")
             connection.commit() #Commit insertion
@@ -595,7 +593,7 @@ def customer_view_movie():
 @app.route('/customer_view_history', methods=['POST'])
 def customer_view_history():
     if request.method == "POST":
-        user = request.json['userName']
+        user = request.json['username']
 
         try:
             cur = connection.cursor()
@@ -689,7 +687,7 @@ def user_visit_th():
 def user_filter_visitHistory():
     if request.method == "POST":
         details = request.json
-        user, minDate, maxDate, comName = details['userName'], details['minDate'], details['maxDate'], details['comName']
+        user, minDate, maxDate, comName = details['username'], details['minDate'], details['maxDate'], details['comName']
         minDate = none_convert(minDate)
         maxDate = none_convert(maxDate)
 

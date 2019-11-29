@@ -147,7 +147,8 @@ class ExploreMovie extends Component {
         .catch(err => {
           if (err.message === "400") {
             this.setState({
-              viewErr: "Viewing more than 3 movies a day is not permitted."
+              viewErr:
+                "Card has been used or there are already 3 movies viewed on this day."
             });
           } else {
             this.setState({ viewErr: "Internal Server Error." });

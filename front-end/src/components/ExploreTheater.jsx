@@ -117,8 +117,6 @@ class ExploreTheater extends Component {
         })
       })
         .then(response => {
-          console.log(response);
-          console.log(response.ok);
           if (!response.ok) {
             throw Error(response.status);
           } else {
