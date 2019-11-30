@@ -8,7 +8,9 @@ class ManagerCustomerRegistration extends Component {
     super();
     this.companyList = [];
     this.company = "";
+    this.creditcardList = [];
     this.getCompanyNames();
+    this.getCreditCard();
   }
   state = {
     firstName: "",
@@ -27,8 +29,7 @@ class ManagerCustomerRegistration extends Component {
     samePassword: true,
     validCreditCard: true,
     validZipcode: true,
-    error: null,
-    creditcardList: []
+    error: null
   };
 
   getCompanyNames = () => {
@@ -155,7 +156,7 @@ class ManagerCustomerRegistration extends Component {
         return response.json();
       })
       .then(result => {
-        this.state.creditcardList = result;
+        this.creditcardList = result;
       });
   };
 
@@ -170,9 +171,8 @@ class ManagerCustomerRegistration extends Component {
           return;
         }
 
-        this.getCreditCard();
-        for (var i = 0; i < this.state.creditcardList.length; i++) {
-          if (this.state.creditcardList[i] == this.state.tempCardNumber) {
+        for (var i = 0; i < this.creditcardList.length; i++) {
+          if (this.creditcardList[i] == this.state.tempCardNumber) {
             return;
           }
         }

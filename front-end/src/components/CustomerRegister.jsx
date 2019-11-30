@@ -5,6 +5,10 @@ import CreditCardList from "./CreditCardList";
 import Validation from "./Validation";
 
 class CustomerRegistration extends Component {
+  constructor() {
+    this.creditcardList = [];
+    this.getCreditCard();
+  }
   state = {
     firstName: "",
     lastName: "",
@@ -17,8 +21,7 @@ class CustomerRegistration extends Component {
     validPassword: true,
     samePassword: true,
     validCreditCard: true,
-    error: null,
-    creditcardList: []
+    error: null
   };
 
   handleChange = e => {
@@ -118,7 +121,7 @@ class CustomerRegistration extends Component {
         return response.json();
       })
       .then(result => {
-        this.state.creditcardList = result;
+        this.creditcardList = result;
       });
   };
 
@@ -133,9 +136,8 @@ class CustomerRegistration extends Component {
           return;
         }
 
-        this.getCreditCard();
-        for (var i = 0; i < this.state.creditcardList.length; i++) {
-          if (this.state.creditcardList[i] == this.state.tempCardNumber) {
+        for (var i = 0; i < this.creditcardList.length; i++) {
+          if (this.creditcardList[i] == this.state.tempCardNumber) {
             return;
           }
         }
