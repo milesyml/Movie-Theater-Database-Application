@@ -91,7 +91,7 @@ class VisitHistory extends Component {
           <td>{theater}</td>
           <td>{address}</td>
           <td>{company}</td>
-          <td>{visitDate}</td>
+          <td>{visitDate.match("[0-9]{2}[ ][a-zA-Z]{3}[ ][0-9]{1,}")}</td>
         </tr>
       );
     });
