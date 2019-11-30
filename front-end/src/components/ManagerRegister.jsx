@@ -5,8 +5,6 @@ import Validation from "./Validation";
 class ManagerRegistration extends Component {
   constructor() {
     super();
-    this.companyList = [];
-    this.company = "";
     this.getCompanyNames();
   }
   state = {
@@ -22,7 +20,9 @@ class ManagerRegistration extends Component {
     validPassword: true,
     samePassword: true,
     validZipcode: true,
-    error: null
+    error: null,
+    companyList: [],
+    company: ""
   };
 
   getCompanyNames = () => {
@@ -33,11 +33,22 @@ class ManagerRegistration extends Component {
       }
     })
       .then(response => {
+        console.log(response.status);
+        if (response.status != "200") {
+          throw Error(response.status);
+        }
         return response.json();
       })
       .then(result => {
-        this.companyList = result;
-        this.company = result[0][0];
+        this.setState({ companyList: result });
+        this.setState({ company: result[0][0] });
+      })
+      .catch(err => {
+        if (err.message === "400") {
+          this.setState({ error: "Input error" });
+        } else {
+          this.setState({ error: "Internal Server Error." });
+        }
       });
   };
 
@@ -48,15 +59,10 @@ class ManagerRegistration extends Component {
     });
   };
 
-  handleChangeCompany = e => {
-    this.company = e.target.value;
-  };
-
   handleSubmit = e => {
     console.log("Submit");
     e.preventDefault();
     console.log(this.state);
-    console.log(this.company);
     this.setState({
       validPassword: Validation.isPassword(this.state.password),
       samePassword: Validation.isSame(
@@ -89,7 +95,7 @@ class ManagerRegistration extends Component {
         password: this.state.password,
         firstName: this.state.firstName,
         lastName: this.state.lastName,
-        comName: this.company,
+        comName: this.state.company,
         street: this.state.address,
         city: this.state.city,
         state: this.state.state,
@@ -164,8 +170,8 @@ class ManagerRegistration extends Component {
               Company:{" "}
             </label>
 
-            <select id="company" onChange={this.handleChangeCompany}>
-              {this.companyList.map((item, i) => {
+            <select id="company" onChange={this.handleChange}>
+              {this.state.companyList.map((item, i) => {
                 return (
                   <option key={i} value={item}>
                     {item}

@@ -1,14 +1,12 @@
 import React, { Component } from "react";
 import { Form, Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import CreditCardList from "./CreditCardList";
 import Validation from "./Validation";
+import CreditCardList from "./CreditCardList";
+
 class ManagerCustomerRegistration extends Component {
   constructor() {
     super();
-    this.companyList = [];
-    this.company = "";
-    this.creditcardList = [];
     this.getCompanyNames();
     this.getCreditCard();
   }
@@ -18,18 +16,21 @@ class ManagerCustomerRegistration extends Component {
     username: "",
     password: "",
     confirmPassword: "",
-    address: "",
-    city: "",
-    state: "AL",
-    zipcode: "",
     my_list: [],
     max_number: 5,
     tempCardNumber: "",
+    address: "",
+    city: "AL",
+    state: "",
+    zipcode: "",
     validPassword: true,
     samePassword: true,
-    validCreditCard: true,
     validZipcode: true,
-    error: null
+    validCreditCard: true,
+    error: null,
+    companyList: [],
+    company: "",
+    creditcardList: []
   };
 
   getCompanyNames = () => {
@@ -40,11 +41,77 @@ class ManagerCustomerRegistration extends Component {
       }
     })
       .then(response => {
+        console.log(response.status);
+        if (response.status != "200") {
+          throw Error(response.status);
+        }
         return response.json();
       })
       .then(result => {
-        this.companyList = result;
+        this.setState({ companyList: result });
+        this.setState({ company: result[0][0] });
+      })
+      .catch(err => {
+        if (err.message === "400") {
+          this.setState({ error: "Input error" });
+        } else {
+          this.setState({ error: "Internal Server Error." });
+        }
       });
+  };
+
+  getCreditCard = () => {
+    fetch("http://localhost:5000/get_creditcards", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(result => {
+        this.setState({
+          creditcardList: result
+        });
+      });
+  };
+
+  handleAddCard = () => {
+    if (this.state.my_list.length < this.state.max_number) {
+      if (this.state.tempCardNumber != "") {
+        var new_list = this.state.my_list;
+
+        this.setState({
+          validCreditCard: Validation.isCreditCard(this.state.tempCardNumber)
+        });
+        if (!Validation.isCreditCard(this.state.tempCardNumber)) {
+          return;
+        }
+
+        for (var i = 0; i < this.state.my_list.length; i++) {
+          if (this.state.my_list[i] == this.state.tempCardNumber) {
+            return;
+          }
+        }
+        for (var i = 0; i < this.state.creditcardList.length; i++) {
+          if (this.state.creditcardList[i] == this.state.tempCardNumber) {
+            return;
+          }
+        }
+
+        new_list.push(this.state.tempCardNumber);
+
+        this.setState({ my_list: new_list });
+      }
+      console.log(this.state.my_list);
+    }
+  };
+
+  removeCard = event => {
+    var new_list = this.state.my_list;
+    new_list.splice(event.target.id, 1);
+    this.setState({ my_list: new_list });
   };
 
   handleChange = e => {
@@ -52,10 +119,6 @@ class ManagerCustomerRegistration extends Component {
     this.setState({
       [e.target.id]: e.target.value
     });
-  };
-
-  handleChangeCompany = e => {
-    this.company = e.target.value;
   };
 
   handleSubmit = e => {
@@ -67,8 +130,10 @@ class ManagerCustomerRegistration extends Component {
       samePassword: Validation.isSame(
         this.state.password,
         this.state.confirmPassword
-      )
+      ),
+      validZipcode: Validation.isZipcode(this.state.zipcode)
     });
+
     if (
       this.state.firstName == "" ||
       this.state.lastName == "" ||
@@ -83,7 +148,7 @@ class ManagerCustomerRegistration extends Component {
       return;
     }
 
-    fetch("http://localhost:5000/customer_only_register", {
+    fetch("http://localhost:5000/manager_customer_register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -93,7 +158,7 @@ class ManagerCustomerRegistration extends Component {
         password: this.state.password,
         firstName: this.state.firstName,
         lastName: this.state.lastName,
-        comName: this.company,
+        comName: this.state.company,
         street: this.state.address,
         city: this.state.city,
         state: this.state.state,
@@ -102,7 +167,6 @@ class ManagerCustomerRegistration extends Component {
     })
       .then(response => {
         console.log(response.status);
-        console.log("debug");
         if (response.status != "200") {
           throw Error(response.status);
         } else {
@@ -142,139 +206,6 @@ class ManagerCustomerRegistration extends Component {
           this.setState({ error: "Internal Server." });
         }
       });
-  };
-
-  // handleSubmit = e => {
-  //   console.log("Submit");
-  //   e.preventDefault();
-  //   console.log(this.state);
-  //   console.log(this.company);
-  //   this.setState({
-  //     validPassword: Validation.isPassword(this.state.password),
-  //     samePassword: Validation.isSame(
-  //       this.state.password,
-  //       this.state.confirmPassword
-  //     ),
-  //     validZipcode: Validation.isZipcode(this.state.zipcode)
-  //   });
-  // if (
-  //   this.state.firstName == "" ||
-  //   this.state.lastName == "" ||
-  //   this.state.username == "" ||
-  //   this.state.city == "" ||
-  //   !Validation.isPassword(this.state.password) ||
-  //   !Validation.isSame(this.state.password, this.state.confirmPassword) ||
-  //   !Validation.isZipcode(this.state.zipcode) ||
-  //   this.state.my_list.length == 0
-  // ) {
-  //   console.log("error");
-  //   return;
-  // }
-
-  //   fetch("http://localhost:5000/manager_customer_register", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json"
-  //     },
-  //     body: JSON.stringify({
-  //       userName: this.state.username,
-  //       password: this.state.password,
-  //       firstName: this.state.firstName,
-  //       lastName: this.state.lastName,
-  //       comName: this.company,
-  //       street: this.state.address,
-  //       city: this.state.city,
-  //       state: this.state.state,
-  //       zipCode: this.state.zipcode
-  //     })
-  //   })
-  //     .then(response => {
-  //       console.log(response.status);
-  //       if (response.status != "200") {
-  //         throw Error(response.status);
-  //       } else {
-  //         fetch("http://localhost:5000/add_credit", {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/json"
-  //           },
-  //           body: JSON.stringify({
-  //             userName: this.state.username,
-  //             cards: this.state.my_list
-  //           })
-  //         })
-  //           .then(response => {
-  //             console.log(this.state.my_list);
-  //             if (response.status != "200") {
-  //               throw Error(response.status);
-  //             } else {
-  //               this.props.history.push("/");
-  //               return response.json();
-  //             }
-  //           })
-  //           .catch(err => {
-  //             if (err.message === "400") {
-  //               this.setState({ error: "Input error" });
-  //             } else {
-  //               this.setState({ error: "Internal Server Error." });
-  //             }
-  //           });
-  //         return response.json();
-  //       }
-  //     })
-  //     .catch(err => {
-  //       if (err.message === "400") {
-  //         this.setState({ error: "Username Exists!" });
-  //       } else {
-  //         this.setState({ error: "Internal Server." });
-  //       }
-  //     });
-  // };
-
-  getCreditCard = () => {
-    fetch("http://localhost:5000/get_creditcards", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-      .then(response => {
-        return response.json();
-      })
-      .then(result => {
-        this.creditcardList = result;
-      });
-  };
-
-  handleAddCard = () => {
-    if (this.state.my_list.length < this.state.max_number) {
-      if (this.state.tempCardNumber != "") {
-        var new_list = this.state.my_list;
-        this.setState({
-          validCreditCard: Validation.isCreditCard(this.state.tempCardNumber)
-        });
-        if (!Validation.isCreditCard(this.state.tempCardNumber)) {
-          return;
-        }
-
-        for (var i = 0; i < this.creditcardList.length; i++) {
-          if (this.creditcardList[i] == this.state.tempCardNumber) {
-            return;
-          }
-        }
-
-        new_list.push(this.state.tempCardNumber);
-
-        this.setState({ my_list: new_list });
-      }
-      console.log(this.state.my_list);
-    }
-  };
-
-  removeCard = event => {
-    var new_list = this.state.my_list;
-    new_list.splice(event.target.id, 1);
-    this.setState({ my_list: new_list });
   };
 
   style = {
@@ -326,8 +257,9 @@ class ManagerCustomerRegistration extends Component {
             <label htmlFor="company" style={{ padding: 10 }}>
               Company:{" "}
             </label>
-            <select id="company" onChange={this.handleChangeCompany}>
-              {this.companyList.map((item, i) => {
+
+            <select id="company" onChange={this.handleChange}>
+              {this.state.companyList.map((item, i) => {
                 return (
                   <option key={i} value={item}>
                     {item}
@@ -441,6 +373,7 @@ class ManagerCustomerRegistration extends Component {
             handleAddCard={this.handleAddCard}
             handleChange={this.handleChange}
           ></CreditCardList>
+
           {this.state.error && (
             <div className="alert alert-danger" style={{ marginTop: 10 }}>
               {this.state.error}
@@ -457,8 +390,8 @@ class ManagerCustomerRegistration extends Component {
           </div>
           {!this.state.validPassword && <p>Incorrect password input</p>}
           {!this.state.samePassword && <p>Password doesn't match</p>}
-          {!this.state.validCreditCard && <p>Invalid creditcard</p>}
           {!this.state.validZipcode && <p>Invalid zipcode</p>}
+          {!this.state.validCreditCard && <p>Invalid creditcard</p>}
         </Form>
       </div>
     );

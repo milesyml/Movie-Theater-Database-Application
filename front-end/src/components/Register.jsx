@@ -19,7 +19,7 @@ class Register extends Component {
   };
 
   render() {
-    console.log(this.props.location.state);
+    // console.log(this.props.location.state);
     return (
       <div className="center-div">
         <h1>Register Navigation</h1>

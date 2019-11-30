@@ -7,7 +7,6 @@ import Validation from "./Validation";
 class CustomerRegistration extends Component {
   constructor() {
     super();
-    this.creditcardList = [];
     this.getCreditCard();
   }
   state = {
@@ -22,7 +21,8 @@ class CustomerRegistration extends Component {
     validPassword: true,
     samePassword: true,
     validCreditCard: true,
-    error: null
+    error: null,
+    creditcardList: []
   };
 
   handleChange = e => {
@@ -69,7 +69,6 @@ class CustomerRegistration extends Component {
     })
       .then(response => {
         console.log(response.status);
-        console.log("debug");
         if (response.status != "200") {
           throw Error(response.status);
         } else {
@@ -122,7 +121,9 @@ class CustomerRegistration extends Component {
         return response.json();
       })
       .then(result => {
-        this.creditcardList = result;
+        this.setState({
+          creditcardList: result
+        });
       });
   };
 
@@ -137,8 +138,14 @@ class CustomerRegistration extends Component {
           return;
         }
 
-        for (var i = 0; i < this.creditcardList.length; i++) {
-          if (this.creditcardList[i] == this.state.tempCardNumber) {
+        for (var i = 0; i < this.state.my_list.length; i++) {
+          if (this.state.my_list[i] == this.state.tempCardNumber) {
+            return;
+          }
+        }
+
+        for (var i = 0; i < this.state.creditcardList.length; i++) {
+          if (this.state.creditcardList[i] == this.state.tempCardNumber) {
             return;
           }
         }
