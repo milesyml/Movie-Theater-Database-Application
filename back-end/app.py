@@ -711,11 +711,8 @@ def user_filter_visitHistory():
                 return make_response("Minimum Date must be before Maximum Date",400)           
         try:
             cur = connection.cursor()
-            cur.callproc('user_filter_visitHistory', [user, minDate, maxDate])
-            if comName == 'ALL':
-                cur.execute("select thName as theater, concat(thStreet,', ',thCity,', ',thState,' ',thZipcode) as address, comName as company, visitDate from uservisithistory")
-            else:    
-                cur.execute("select thName as theater, concat(thStreet,', ',thCity,', ',thState,' ',thZipcode) as address, comName as company, visitDate from uservisithistory where comName = '{}'".format(comName))
+            cur.callproc('user_filter_visitHistory', [user, minDate, maxDate, comName])
+            cur.execute("select thName as theater, concat(thStreet,', ',thCity,', ',thState,' ',thZipcode) as address, comName as company, visitDate from uservisithistory")
             rv = cur.fetchall()
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
