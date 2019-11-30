@@ -64,6 +64,24 @@ HTTP/1.1 200 OK
 HTTP/1.1 500
 Error occured: {error message}
 
+### Common 4: get credit cards
+@api {GET} '/get_creditcards'
+
+
+@success example
+HTTP/1.1 200 OK
+[
+  [
+    "1111111111000000"
+  ],
+  [
+    "1111111100000000"
+  ]
+]
+@error example
+HTTP/1.1 500
+Error occured: {error message}
+
 
 
 ### screen 1: login
