@@ -400,17 +400,6 @@ def admin_filter_company():
             return make_response(msg, 400)  
 
 #Screen 15 (Get Eligible Managers)
-# @app.route('/get_eligible_managers', methods=['GET'])
-# def get_eligible_managers():
-#     if request.method == "GET":
-#         cur = connection.cursor()
-#         cur.execute(""" select concat(firstname,' ',lastname) as fullName from user where username in 
-#                         (select username from manager where username not in 
-#                         (select managerusername from theater)); """)
-#         rv = cur.fetchall()
-#         cur.close()
-#         return jsonify(rv)
-
 @app.route('/get_eligible_managers', methods=['POST'])
 def get_eligible_managers():
     if request.method == "POST":
@@ -418,13 +407,14 @@ def get_eligible_managers():
 
         try:
             cur = connection.cursor()
-            cur.execute(""" select concat(firstname,' ',lastname) as fullName from user where username in
+            cur.execute(""" select concat(firstname,' ',lastname) as fullName, username from user where username in
                             (select username from manager 
                             where username not in (select managerusername from theater where company = '{}')
                             and company = '{}');""".format(comName,comName))
             rv = cur.fetchall()
+            items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
-            return jsonify(rv)
+            return jsonify(items)
         except mysql.connector.Error as error:
             cur.close()
             msg = "Error occured: {}".format(error)
