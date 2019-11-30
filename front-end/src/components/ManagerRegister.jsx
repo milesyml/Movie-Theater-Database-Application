@@ -3,20 +3,42 @@ import { Form, Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Validation from "./Validation";
 class ManagerRegistration extends Component {
+  constructor() {
+    super();
+    this.companyList = [];
+    this.company = "";
+    this.getCompanyNames();
+  }
   state = {
     firstName: "",
     lastName: "",
     username: "",
     password: "",
     confirmPassword: "",
-    company: "4400TC",
     address: "",
     city: "AL",
     state: "",
     zipcode: "",
     validPassword: true,
     samePassword: true,
-    validZipcode: true
+    validZipcode: true,
+    error: null
+  };
+
+  getCompanyNames = () => {
+    fetch("http://localhost:5000/get_companies", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(result => {
+        this.companyList = result;
+        this.company = result[0][0];
+      });
   };
 
   handleChange = e => {
@@ -26,10 +48,15 @@ class ManagerRegistration extends Component {
     });
   };
 
+  handleChangeCompany = e => {
+    this.company = e.target.value;
+  };
+
   handleSubmit = e => {
     console.log("Submit");
     e.preventDefault();
     console.log(this.state);
+    console.log(this.company);
     this.setState({
       validPassword: Validation.isPassword(this.state.password),
       samePassword: Validation.isSame(
@@ -38,6 +65,53 @@ class ManagerRegistration extends Component {
       ),
       validZipcode: Validation.isZipcode(this.state.zipcode)
     });
+
+    if (
+      this.state.firstName == "" ||
+      this.state.lastName == "" ||
+      this.state.username == "" ||
+      this.state.city == "" ||
+      !Validation.isPassword(this.state.password) ||
+      !Validation.isSame(this.state.password, this.state.confirmPassword) ||
+      !Validation.isZipcode(this.state.zipcode)
+    ) {
+      console.log("error");
+      return;
+    }
+
+    fetch("http://localhost:5000/manager_only_register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userName: this.state.username,
+        password: this.state.password,
+        firstName: this.state.firstName,
+        lastName: this.state.lastName,
+        comName: this.company,
+        street: this.state.address,
+        city: this.state.city,
+        state: this.state.state,
+        zipCode: this.state.zipcode
+      })
+    })
+      .then(response => {
+        console.log(response.status);
+        if (response.status != "200") {
+          throw Error(response.status);
+        } else {
+          this.props.history.push("/");
+          return response.json();
+        }
+      })
+      .catch(err => {
+        if (err.message === "400") {
+          this.setState({ error: "Username Exists!" });
+        } else {
+          this.setState({ error: "Internal Server." });
+        }
+      });
   };
 
   style = {
@@ -89,11 +163,15 @@ class ManagerRegistration extends Component {
             <label htmlFor="company" style={{ padding: 10 }}>
               Company:{" "}
             </label>
-            <select id="company" onChange={this.handleChange}>
-              <option value="4400TC">4400TC</option>
-              <option value="AITC">AITC</option>
-              <option value="ATC">ATC</option>
-              <option value="EZTC">EZTC</option>
+
+            <select id="company" onChange={this.handleChangeCompany}>
+              {this.companyList.map((item, i) => {
+                return (
+                  <option key={i} value={item}>
+                    {item}
+                  </option>
+                );
+              })}
             </select>
           </div>
           <div className="InputField" style={this.style}>
@@ -194,6 +272,11 @@ class ManagerRegistration extends Component {
               onChange={this.handleChange}
             ></input>
           </div>
+          {this.state.error && (
+            <div className="alert alert-danger" style={{ marginTop: 10 }}>
+              {this.state.error}
+            </div>
+          )}
           <div>
             <Link to="/register">
               <Button style={this.btnStyle}>Back</Button>
