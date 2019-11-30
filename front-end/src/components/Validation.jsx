@@ -10,7 +10,7 @@ class Validation extends Component {
   };
 
   static isSame = (password, confirmPassword) => {
-    if (password == confirmPassword) return true;
+    if (password === confirmPassword) return true;
     return false;
   };
   render() {

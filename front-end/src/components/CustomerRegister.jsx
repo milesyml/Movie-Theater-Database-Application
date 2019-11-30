@@ -6,6 +6,7 @@ import Validation from "./Validation";
 
 class CustomerRegistration extends Component {
   constructor() {
+    super();
     this.creditcardList = [];
     this.getCreditCard();
   }

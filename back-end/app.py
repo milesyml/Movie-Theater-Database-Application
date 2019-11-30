@@ -95,7 +95,7 @@ def user_login():
                 
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
-            return items[0]
+            return jsonify(items[0])
         except mysql.connector.IntegrityError as error:
             cur.close()
             msg = "Input Error: {}".format(error)
@@ -111,6 +111,7 @@ def user_login():
 def user_register():
     if request.method == "POST":
         details = request.json
+        print(details)
         user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
 
         try:
