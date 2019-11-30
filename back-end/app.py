@@ -9,8 +9,8 @@ CORS(app)
 
 #SQL Server Details Here
 connection = mysql.connector.connect(host="localhost",
-                                     user="root",
-                                     password="",
+                                     user="test",
+                                     password="password1234",
                                      database="team36")
 
 def none_convert(input):
@@ -82,7 +82,7 @@ def user_login():
         details = request.json
         user, pw = details['username'], details['password']
 
-        print(details)
+
         try:
             cur = connection.cursor()
             cur.callproc('user_login', [user,pw]) #Call login procedure
@@ -95,7 +95,7 @@ def user_login():
                 
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
-            return jsonify(items[0])
+            return items[0]
         except mysql.connector.IntegrityError as error:
             cur.close()
             msg = "Input Error: {}".format(error)
