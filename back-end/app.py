@@ -9,8 +9,8 @@ CORS(app)
 
 #SQL Server Details Here
 connection = mysql.connector.connect(host="localhost",
-                                     user="root",
-                                     password="",
+                                     user="test",
+                                     password="password1234",
                                      database="team36")
 
 def none_convert(input):
@@ -44,7 +44,7 @@ def get_companies():
             return jsonify(rv)
     except mysql.connector.Error as error:
         msg = "Error occured: {}".format(error)
-        return make_response(msg, 500)
+        return make_response(msg, 400)
 
 #General (Get movie names)
 @app.route('/get_movies', methods=['GET'])
@@ -58,7 +58,7 @@ def get_movies():
             return jsonify(rv)
     except mysql.connector.Error as error:
         msg = "Error occured: {}".format(error)
-        return make_response(msg, 500)
+        return make_response(msg, 400)
         
 #General (Get credit cards)
 @app.route('/get_creditcards', methods=['GET'])
@@ -72,22 +72,7 @@ def get_creditcards():
             return jsonify(rv)
     except mysql.connector.Error as error:
         msg = "Error occured: {}".format(error)
-        return make_response(msg, 500)
-
-#General (Get credit cards)
-@app.route('/get_creditcards', methods=['GET'])
-def get_creditcards():
-    try:
-        if request.method == "GET":
-            cur = connection.cursor()
-            cur.execute('SELECT CreditCardNumber FROM creditcard')
-            rv = cur.fetchall()
-            cur.close()
-            return jsonify(rv)
-    except mysql.connector.Error as error:
-        msg = "Error occured: {}".format(error)
-        return make_response(msg, 500)
-
+        return make_response(msg, 400)
 
 #Screen 1 (User Login)
 @app.route('/user_login', methods=['POST'])
@@ -96,7 +81,7 @@ def user_login():
         details = request.json
         user, pw = details['username'], details['password']
 
-        print(details)
+
         try:
             cur = connection.cursor()
             cur.callproc('user_login', [user,pw]) #Call login procedure
@@ -109,7 +94,7 @@ def user_login():
                 
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
-            return jsonify(items[0])
+            return items[0]
         except mysql.connector.IntegrityError as error:
             cur.close()
             msg = "Input Error: {}".format(error)
@@ -117,7 +102,7 @@ def user_login():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)            
+            return make_response(msg, 400)            
 
 
 #Screen 3 (User Register)
@@ -140,7 +125,7 @@ def user_register():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
 
 #Screen 4 (Customer Register)
 @app.route('/customer_only_register', methods=['POST'])
@@ -148,7 +133,7 @@ def customer_only_register():
     if request.method == "POST":
         details = request.json
         user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
-
+        
         try:
             cur = connection.cursor()
             cur.callproc('customer_only_register', [user,pw,first,last])
@@ -162,7 +147,39 @@ def customer_only_register():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
+
+#Screen 4 (Customer Register with Cards)
+@app.route('/customer_only_register_combined', methods=['POST'])
+def customer_only_register_combined():
+    if request.method == "POST":
+        details = request.json
+        user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
+        cards = set(details['cards'])
+
+        try:
+            cur = connection.cursor()
+            cur.execute('SELECT CreditCardNumber FROM creditcard')
+            curcards = cur.fetchall()
+            curcards = [i[0] for i in curcards]
+            for card in cards:
+                if card in curcards:
+                    return make_response("Card already exists", 400)
+
+            cur.callproc('customer_only_register', [user,pw,first,last])
+            for card in cards:
+                cur.callproc('customer_add_creditcard', [user,card])
+            connection.commit() #Commit insertion
+            cur.close()
+            return "Customer Registered"
+        except mysql.connector.IntegrityError as error:
+            cur.close()
+            msg = "Input Error: {}".format(error)
+            return make_response(msg, 400)
+        except mysql.connector.Error as error:
+            cur.close()
+            msg = "Failed to execute stored procedure: {}".format(error)
+            return make_response(msg, 400)
 
 #Screen 4/6 (Credit Card Insertion)
 @app.route('/add_credit', methods=['POST'])
@@ -185,7 +202,7 @@ def add_credit():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)  
-            return make_response(msg, 500)     
+            return make_response(msg, 400)     
 
 #Screen 5 (Manager Register)
 @app.route('/manager_only_register', methods=['POST'])
@@ -209,7 +226,7 @@ def manager_only_register():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
 
 #Screen 6 (Manager-Customer Register)
 @app.route('/manager_customer_register', methods=['POST'])
@@ -225,7 +242,7 @@ def manager_customer_register():
             cur.callproc('manager_customer_register', [user,pw,first,last,comName,street,city,state,zipCode])
             connection.commit() #Commit insertion
             cur.close()
-            return "Manager Registered"
+            return "Manager-Customer Registered"
         except mysql.connector.IntegrityError as error:
             cur.close()
             msg = "Input Error: {}".format(error)
@@ -233,7 +250,41 @@ def manager_customer_register():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
+
+#Screen 6 (Manager-Customer Register w Cards)
+@app.route('/manager_customer_register_combined', methods=['POST'])
+def manager_customer_register_combined():
+    if request.method == "POST":
+        details = request.json
+        user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
+        comName, street, city = details['comName'], details['street'], details['city']
+        state, zipCode = details['state'], details['zipCode']
+        cards = set(details['cards'])
+
+        try:
+            cur = connection.cursor()
+            cur.execute('SELECT CreditCardNumber FROM creditcard')
+            curcards = cur.fetchall()
+            curcards = [i[0] for i in curcards]
+            for card in cards:
+                if card in curcards:
+                    return make_response("Card already exists", 400)
+
+            cur.callproc('manager_customer_register', [user,pw,first,last,comName,street,city,state,zipCode])
+            for card in cards:
+                cur.callproc('customer_add_creditcard', [user,card])            
+            connection.commit() #Commit insertion
+            cur.close()
+            return "Manager-Customer Registered"
+        except mysql.connector.IntegrityError as error:
+            cur.close()
+            msg = "Input Error: {}".format(error)
+            return make_response(msg, 400)
+        except mysql.connector.Error as error:
+            cur.close()
+            msg = "Failed to execute stored procedure: {}".format(error)
+            return make_response(msg, 400)
 
 #Screen 13 (Admin Filter User)
 #Untested
@@ -260,7 +311,7 @@ def admin_filter_user():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)   
+            return make_response(msg, 400)   
 
 #Screen 13 (User Approval)
 @app.route('/admin_approve_user', methods=['POST'])
@@ -281,7 +332,7 @@ def approve_user():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
 
 #Screen 13 (User Decline)
 @app.route('/admin_decline_user', methods=['POST'])
@@ -306,7 +357,7 @@ def decline_user():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
 
 #Screen 14 (Admin Filter Company)
 #Untested
@@ -345,7 +396,7 @@ def admin_filter_company():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)  
+            return make_response(msg, 400)  
 
 #Screen 15 (Get Eligible Managers)
 # @app.route('/get_eligible_managers', methods=['GET'])
@@ -383,6 +434,7 @@ def get_eligible_managers():
 def admin_create_theater():
     if request.method == "POST":
         details = request.json
+        print(details)
         thName, comName, street = details['thName'], details['comName'], details['street']
         city, state, zipCode,  = details['city'], details['state'], details['zipCode']
         capacity, managerUser = details['capacity'], details['managerUser']
@@ -400,7 +452,7 @@ def admin_create_theater():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
 
 #Screen 16 (Combine Theater and Employee)
 @app.route('/admin_view_comDetail_combined', methods=['POST'])
@@ -433,7 +485,7 @@ def admin_view_comDetail_combined():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
 
 #Screen 17 (Create Movie)
 @app.route('/admin_create_mov', methods=['POST'])
@@ -455,7 +507,7 @@ def admin_create_mov():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
 
 #Screen 18 (Manager Filter Theater)
 #Untested
@@ -496,7 +548,7 @@ def manager_filter_th():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)  
+            return make_response(msg, 400)  
 
 #Screen 19 (Manager Schedule Movie)
 @app.route('/manager_schedule_mov', methods=['POST'])
@@ -522,7 +574,7 @@ def manager_schedule_mov():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
 
 #Screen 20 (Get Movie Names, Company Names and Customer's Cards)
 @app.route('/screen20_get_all', methods=['POST'])
@@ -552,7 +604,7 @@ def screen20_get_all():
             return jsonify(movies, companies, cards)
     except mysql.connector.Error as error:
         msg = "Error occured: {}".format(error)
-        return make_response(msg, 500)
+        return make_response(msg, 400)
 
 #Screen 20 (Customer Filter Movie)
 #Untested & Logical Constraints Not Done?
@@ -583,7 +635,7 @@ def customer_filter_mov():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500) 
+            return make_response(msg, 400) 
 
 #Screen 20 (Customer View Movie)
 #Please test logical constraint
@@ -616,7 +668,7 @@ def customer_view_movie():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
 
 #Screen 21 (Customer View History)
 @app.route('/customer_view_history', methods=['POST'])
@@ -639,7 +691,7 @@ def customer_view_history():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
 
 #Screen 22 (Get Theater Names and Company Names)
 @app.route('/screen22_get_all', methods=['GET'])
@@ -662,7 +714,7 @@ def screen22_get_all():
     except mysql.connector.Error as error:
         cur.close()
         msg = "Error occured: {}".format(error)
-        return make_response(msg, 500)
+        return make_response(msg, 400)
 
 
 #Screen 22 (User Filter Theater)
@@ -687,7 +739,7 @@ def user_filter_th():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
 
 #Screen 22 (User Visit Theater)
 @app.route('/user_visit_th', methods=['POST'])
@@ -709,7 +761,7 @@ def user_visit_th():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
 
 #Screen 23 (User Filter Visit History)
 @app.route('/user_filter_visitHistory', methods=['POST'])
@@ -738,7 +790,7 @@ def user_filter_visitHistory():
         except mysql.connector.Error as error:
             cur.close()
             msg = "Failed to execute stored procedure: {}".format(error)
-            return make_response(msg, 500)
+            return make_response(msg, 400)
 
 if __name__ == '__main__':
     app.run(debug=True)
