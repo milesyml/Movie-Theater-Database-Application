@@ -6,6 +6,7 @@ class ManagerRegistration extends Component {
   constructor() {
     super();
     this.companyList = [];
+    this.company = "";
     this.getCompanyNames();
   }
   state = {
@@ -14,7 +15,6 @@ class ManagerRegistration extends Component {
     username: "",
     password: "",
     confirmPassword: "",
-    company: "4400TC",
     address: "",
     city: "AL",
     state: "",
@@ -37,6 +37,7 @@ class ManagerRegistration extends Component {
       })
       .then(result => {
         this.companyList = result;
+        this.company = result[0][0];
       });
   };
 
@@ -47,10 +48,15 @@ class ManagerRegistration extends Component {
     });
   };
 
+  handleChangeCompany = e => {
+    this.company = e.target.value;
+  };
+
   handleSubmit = e => {
     console.log("Submit");
     e.preventDefault();
     console.log(this.state);
+    console.log(this.company);
     this.setState({
       validPassword: Validation.isPassword(this.state.password),
       samePassword: Validation.isSame(
@@ -64,7 +70,6 @@ class ManagerRegistration extends Component {
       this.state.firstName == "" ||
       this.state.lastName == "" ||
       this.state.username == "" ||
-      this.state.address == "" ||
       this.state.city == "" ||
       !Validation.isPassword(this.state.password) ||
       !Validation.isSame(this.state.password, this.state.confirmPassword) ||
@@ -84,7 +89,7 @@ class ManagerRegistration extends Component {
         password: this.state.password,
         firstName: this.state.firstName,
         lastName: this.state.lastName,
-        comName: this.state.company,
+        comName: this.company,
         street: this.state.address,
         city: this.state.city,
         state: this.state.state,
@@ -93,7 +98,6 @@ class ManagerRegistration extends Component {
     })
       .then(response => {
         console.log(response.status);
-        console.log("debug");
         if (response.status != "200") {
           throw Error(response.status);
         } else {
@@ -160,7 +164,7 @@ class ManagerRegistration extends Component {
               Company:{" "}
             </label>
 
-            <select id="company" onChange={this.handleChange}>
+            <select id="company" onChange={this.handleChangeCompany}>
               {this.companyList.map((item, i) => {
                 return (
                   <option key={i} value={item}>

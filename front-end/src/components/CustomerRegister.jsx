@@ -50,96 +50,60 @@ class CustomerRegistration extends Component {
       return;
     }
 
-    // var apiRequest1 = fetch("http://localhost:5000/customer_only_register", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json"
-    //   },
-    //   body: JSON.stringify({
-    //     userName: this.state.username,
-    //     password: this.state.password,
-    //     firstName: this.state.firstName,
-    //     lastName: this.state.lastName
-    //   })
-    // }).then(function(response) {
-    //   return response.json();
-    // });
-    // var apiRequest2 = fetch("http://localhost:5000/add_credit", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json"
-    //   },
-    //   body: JSON.stringify({
-    //     userName: this.state.username,
-    //     cards: this.state.my_list
-    //   })
-    // }).then(function(response) {
-    //   return response.json();
-    // });
-    // var combinedData = { apiRequest1: {}, apiRequest2: {} };
-
-    // Promise.all([apiRequest1, apiRequest2]).then(function(values) {
-    //   combinedData["apiRequest1"] = values[0];
-    //   combinedData["apiRequest2"] = values[1];
-    //   return combinedData;
-    // });
-
-    // fetch("http://localhost:5000/customer_only_register", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json"
-    //   },
-    //   body: JSON.stringify({
-    //     userName: this.state.username,
-    //     password: this.state.password,
-    //     firstName: this.state.firstName,
-    //     lastName: this.state.lastName
-    //   })
-    // })
-    //   .then(response => {
-    //     console.log(response.status);
-    //     console.log("debug");
-    //     if (response.status != "200") {
-    //       throw Error(response.status);
-    //     } else {
-    //       // this.props.history.push("/");
-    //       return response.json();
-    //     }
-    //   })
-    //   .catch(err => {
-    //     if (err.message === "400") {
-    //       this.setState({ error: "Username Exists!" });
-    //     } else {
-    //       this.setState({ error: "Internal Server." });
-    //     }
-    //   });
-
-    // fetch("http://localhost:5000/add_credit", {
-    // method: "POST",
-    // headers: {
-    //   "Content-Type": "application/json"
-    // },
-    // body: JSON.stringify({
-    //   userName: this.state.username,
-    //   cards: this.state.my_list
-    // })
-    // })
-    //   .then(response => {
-    //     console.log(response.status);
-    //     if (response.status != "200") {
-    //       throw Error(response.status);
-    //     } else {
-    //       this.props.history.push("/");
-    //       return response.json();
-    //     }
-    //   })
-    //   .catch(err => {
-    //     if (err.message === "400") {
-    //       this.setState({ error: "Input error" });
-    //     } else {
-    //       this.setState({ error: "Internal Server Error." });
-    //     }
-    //   });
+    fetch("http://localhost:5000/customer_only_register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userName: this.state.username,
+        password: this.state.password,
+        firstName: this.state.firstName,
+        lastName: this.state.lastName
+      })
+    })
+      .then(response => {
+        console.log(response.status);
+        console.log("debug");
+        if (response.status != "200") {
+          throw Error(response.status);
+        } else {
+          fetch("http://localhost:5000/add_credit", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              userName: this.state.username,
+              cards: this.state.my_list
+            })
+          })
+            .then(response => {
+              console.log(this.state.my_list);
+              if (response.status != "200") {
+                throw Error(response.status);
+              } else {
+                this.props.history.push("/");
+                return response.json();
+              }
+            })
+            .catch(err => {
+              if (err.message === "400") {
+                this.setState({ error: "Input error" });
+              } else {
+                this.setState({ error: "Internal Server Error." });
+              }
+            });
+          return response.json();
+        }
+      })
+      .catch(err => {
+        if (err.message === "400") {
+          this.setState({ error: "Username Exists!" });
+        } else {
+          this.setState({ error: "Internal Server." });
+        }
+      });
   };
 
   handleAddCard = () => {
