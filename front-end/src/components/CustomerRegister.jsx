@@ -17,7 +17,8 @@ class CustomerRegistration extends Component {
     validPassword: true,
     samePassword: true,
     validCreditCard: true,
-    error: null
+    error: null,
+    creditcardList: []
   };
 
   handleChange = e => {
@@ -106,6 +107,21 @@ class CustomerRegistration extends Component {
       });
   };
 
+  getCreditCard = () => {
+    fetch("http://localhost:5000/get_creditcards", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(result => {
+        this.state.creditcardList = result;
+      });
+  };
+
   handleAddCard = () => {
     if (this.state.my_list.length < this.state.max_number) {
       if (this.state.tempCardNumber != "") {
@@ -116,6 +132,14 @@ class CustomerRegistration extends Component {
         if (!Validation.isCreditCard(this.state.tempCardNumber)) {
           return;
         }
+
+        this.getCreditCard();
+        for (var i = 0; i < this.state.creditcardList.length; i++) {
+          if (this.state.creditcardList[i] == this.state.tempCardNumber) {
+            return;
+          }
+        }
+
         new_list.push(this.state.tempCardNumber);
 
         this.setState({ my_list: new_list });

@@ -10,7 +10,7 @@ CORS(app)
 #SQL Server Details Here
 connection = mysql.connector.connect(host="localhost",
                                      user="root",
-                                     password=" ",
+                                     password="morris88826",
                                      database="team36",
                                      use_pure = True)
 
@@ -54,6 +54,20 @@ def get_movies():
         if request.method == "GET":
             cur = connection.cursor()
             cur.execute('SELECT name FROM movie')
+            rv = cur.fetchall()
+            cur.close()
+            return jsonify(rv)
+    except mysql.connector.Error as error:
+        msg = "Error occured: {}".format(error)
+        return make_response(msg, 500)
+        
+#General (Get credit cards)
+@app.route('/get_creditcards', methods=['GET'])
+def get_creditcards():
+    try:
+        if request.method == "GET":
+            cur = connection.cursor()
+            cur.execute('SELECT CreditCardNumber FROM creditcard')
             rv = cur.fetchall()
             cur.close()
             return jsonify(rv)
