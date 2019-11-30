@@ -10,14 +10,9 @@ CORS(app)
 #SQL Server Details Here
 connection = mysql.connector.connect(host="localhost",
                                      user="root",
-<<<<<<< HEAD
                                      password="",
-                                     database="team36")
-=======
-                                     password="morris88826",
                                      database="team36",
                                      use_pure=True)
->>>>>>> fea5da2692f12e4884f4cd3650b81ad738af959a
 
 def none_convert(input):
     """Converts empty string to None to feed to callproc"""
