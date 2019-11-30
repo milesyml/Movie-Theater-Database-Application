@@ -74,21 +74,6 @@ def get_creditcards():
         msg = "Error occured: {}".format(error)
         return make_response(msg, 500)
 
-#General (Get credit cards)
-@app.route('/get_creditcards', methods=['GET'])
-def get_creditcards():
-    try:
-        if request.method == "GET":
-            cur = connection.cursor()
-            cur.execute('SELECT CreditCardNumber FROM creditcard')
-            rv = cur.fetchall()
-            cur.close()
-            return jsonify(rv)
-    except mysql.connector.Error as error:
-        msg = "Error occured: {}".format(error)
-        return make_response(msg, 500)
-
-
 #Screen 1 (User Login)
 @app.route('/user_login', methods=['POST'])
 def user_login():
@@ -148,10 +133,42 @@ def customer_only_register():
     if request.method == "POST":
         details = request.json
         user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
-
+        
         try:
             cur = connection.cursor()
             cur.callproc('customer_only_register', [user,pw,first,last])
+            connection.commit() #Commit insertion
+            cur.close()
+            return "Customer Registered"
+        except mysql.connector.IntegrityError as error:
+            cur.close()
+            msg = "Input Error: {}".format(error)
+            return make_response(msg, 400)
+        except mysql.connector.Error as error:
+            cur.close()
+            msg = "Failed to execute stored procedure: {}".format(error)
+            return make_response(msg, 500)
+
+#Screen 4 (Customer Register with Cards)
+@app.route('/customer_only_register_combined', methods=['POST'])
+def customer_only_register_combined():
+    if request.method == "POST":
+        details = request.json
+        user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
+        cards = set(details['cards'])
+
+        try:
+            cur = connection.cursor()
+            cur.execute('SELECT CreditCardNumber FROM creditcard')
+            curcards = cur.fetchall()
+            curcards = [i[0] for i in curcards]
+            for card in cards:
+                if card in curcards:
+                    return make_response("Card already exists", 400)
+
+            cur.callproc('customer_only_register', [user,pw,first,last])
+            for card in cards:
+                cur.callproc('customer_add_creditcard', [user,card])
             connection.commit() #Commit insertion
             cur.close()
             return "Customer Registered"
@@ -225,7 +242,41 @@ def manager_customer_register():
             cur.callproc('manager_customer_register', [user,pw,first,last,comName,street,city,state,zipCode])
             connection.commit() #Commit insertion
             cur.close()
-            return "Manager Registered"
+            return "Manager-Customer Registered"
+        except mysql.connector.IntegrityError as error:
+            cur.close()
+            msg = "Input Error: {}".format(error)
+            return make_response(msg, 400)
+        except mysql.connector.Error as error:
+            cur.close()
+            msg = "Failed to execute stored procedure: {}".format(error)
+            return make_response(msg, 500)
+
+#Screen 6 (Manager-Customer Register w Cards)
+@app.route('/manager_customer_register_combined', methods=['POST'])
+def manager_customer_register_combined():
+    if request.method == "POST":
+        details = request.json
+        user, pw, first, last = details['userName'], details['password'], details['firstName'], details['lastName']
+        comName, street, city = details['comName'], details['street'], details['city']
+        state, zipCode = details['state'], details['zipCode']
+        cards = set(details['cards'])
+
+        try:
+            cur = connection.cursor()
+            cur.execute('SELECT CreditCardNumber FROM creditcard')
+            curcards = cur.fetchall()
+            curcards = [i[0] for i in curcards]
+            for card in cards:
+                if card in curcards:
+                    return make_response("Card already exists", 400)
+
+            cur.callproc('manager_customer_register', [user,pw,first,last,comName,street,city,state,zipCode])
+            for card in cards:
+                cur.callproc('customer_add_creditcard', [user,card])            
+            connection.commit() #Commit insertion
+            cur.close()
+            return "Manager-Customer Registered"
         except mysql.connector.IntegrityError as error:
             cur.close()
             msg = "Input Error: {}".format(error)
