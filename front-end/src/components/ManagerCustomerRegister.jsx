@@ -62,14 +62,12 @@ class ManagerCustomerRegistration extends Component {
     console.log("Submit");
     e.preventDefault();
     console.log(this.state);
-    console.log(this.company);
     this.setState({
       validPassword: Validation.isPassword(this.state.password),
       samePassword: Validation.isSame(
         this.state.password,
         this.state.confirmPassword
-      ),
-      validZipcode: Validation.isZipcode(this.state.zipcode)
+      )
     });
     if (
       this.state.firstName == "" ||
@@ -85,7 +83,7 @@ class ManagerCustomerRegistration extends Component {
       return;
     }
 
-    fetch("http://localhost:5000/manager_customer_register", {
+    fetch("http://localhost:5000/customer_only_register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -104,6 +102,7 @@ class ManagerCustomerRegistration extends Component {
     })
       .then(response => {
         console.log(response.status);
+        console.log("debug");
         if (response.status != "200") {
           throw Error(response.status);
         } else {
@@ -144,6 +143,93 @@ class ManagerCustomerRegistration extends Component {
         }
       });
   };
+
+  // handleSubmit = e => {
+  //   console.log("Submit");
+  //   e.preventDefault();
+  //   console.log(this.state);
+  //   console.log(this.company);
+  //   this.setState({
+  //     validPassword: Validation.isPassword(this.state.password),
+  //     samePassword: Validation.isSame(
+  //       this.state.password,
+  //       this.state.confirmPassword
+  //     ),
+  //     validZipcode: Validation.isZipcode(this.state.zipcode)
+  //   });
+  // if (
+  //   this.state.firstName == "" ||
+  //   this.state.lastName == "" ||
+  //   this.state.username == "" ||
+  //   this.state.city == "" ||
+  //   !Validation.isPassword(this.state.password) ||
+  //   !Validation.isSame(this.state.password, this.state.confirmPassword) ||
+  //   !Validation.isZipcode(this.state.zipcode) ||
+  //   this.state.my_list.length == 0
+  // ) {
+  //   console.log("error");
+  //   return;
+  // }
+
+  //   fetch("http://localhost:5000/manager_customer_register", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json"
+  //     },
+  //     body: JSON.stringify({
+  //       userName: this.state.username,
+  //       password: this.state.password,
+  //       firstName: this.state.firstName,
+  //       lastName: this.state.lastName,
+  //       comName: this.company,
+  //       street: this.state.address,
+  //       city: this.state.city,
+  //       state: this.state.state,
+  //       zipCode: this.state.zipcode
+  //     })
+  //   })
+  //     .then(response => {
+  //       console.log(response.status);
+  //       if (response.status != "200") {
+  //         throw Error(response.status);
+  //       } else {
+  //         fetch("http://localhost:5000/add_credit", {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json"
+  //           },
+  //           body: JSON.stringify({
+  //             userName: this.state.username,
+  //             cards: this.state.my_list
+  //           })
+  //         })
+  //           .then(response => {
+  //             console.log(this.state.my_list);
+  //             if (response.status != "200") {
+  //               throw Error(response.status);
+  //             } else {
+  //               this.props.history.push("/");
+  //               return response.json();
+  //             }
+  //           })
+  //           .catch(err => {
+  //             if (err.message === "400") {
+  //               this.setState({ error: "Input error" });
+  //             } else {
+  //               this.setState({ error: "Internal Server Error." });
+  //             }
+  //           });
+  //         return response.json();
+  //       }
+  //     })
+  //     .catch(err => {
+  //       if (err.message === "400") {
+  //         this.setState({ error: "Username Exists!" });
+  //       } else {
+  //         this.setState({ error: "Internal Server." });
+  //       }
+  //     });
+  // };
 
   getCreditCard = () => {
     fetch("http://localhost:5000/get_creditcards", {
