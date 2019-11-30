@@ -70,6 +70,7 @@ class CreateTheater extends Component {
       .then(message =>
         this.setState({ success: "Successfully created theater." })
       )
+      .then(something => this.fetchEligibleManagers())
       .catch(err => {
         if (err.message === "400") {
           this.setState({ error: "Please check your inputs." });
@@ -82,14 +83,15 @@ class CreateTheater extends Component {
   handleCompanyChange = e => {
     this.setState(
       {
-        [e.target.id]: e.target.value
+        [e.target.id]: e.target.value,
+        error: null,
+        success: null
       },
       () => this.fetchEligibleManagers()
     );
   };
 
   fetchEligibleManagers = () => {
-    this.setState({ error: null, success: null });
     fetch("http://localhost:5000/get_eligible_managers", {
       method: "POST",
       headers: {
@@ -100,6 +102,8 @@ class CreateTheater extends Component {
       })
     })
       .then(response => {
+        console.log(response);
+
         if (!response.ok) {
           throw Error(response.status);
         } else {
@@ -109,7 +113,7 @@ class CreateTheater extends Component {
       .then(data =>
         this.setState({
           allManagerNames: data,
-          manager: data.length === 0 ? "" : data[0][0]
+          manager: data.length === 0 ? "" : data[0].username
         })
       )
       .catch(err => this.setState({ error: "Internal Server Error." }));
@@ -138,8 +142,8 @@ class CreateTheater extends Component {
   renderManagerNames = () => {
     return this.state.allManagerNames.map((managerName, index) => {
       return (
-        <option key={index} value={managerName[0]}>
-          {managerName[0]}
+        <option key={index} value={managerName.username}>
+          {managerName.fullName}
         </option>
       );
     });

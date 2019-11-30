@@ -96,7 +96,6 @@ class ScheduleMovie extends Component {
       })
     })
       .then(response => {
-        console.log(response.text());
         if (!response.ok) {
           throw Error(response.status);
         } else {
