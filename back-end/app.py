@@ -10,9 +10,8 @@ CORS(app)
 #SQL Server Details Here
 connection = mysql.connector.connect(host="localhost",
                                      user="root",
-                                     password="morris88826",
-                                     database="team36",
-                                     use_pure = True)
+                                     password="futiantian",
+                                     database="team36")
 
 def none_convert(input):
     """Converts empty string to None to feed to callproc"""
@@ -74,6 +73,21 @@ def get_creditcards():
     except mysql.connector.Error as error:
         msg = "Error occured: {}".format(error)
         return make_response(msg, 500)
+
+#General (Get credit cards)
+@app.route('/get_creditcards', methods=['GET'])
+def get_creditcards():
+    try:
+        if request.method == "GET":
+            cur = connection.cursor()
+            cur.execute('SELECT CreditCardNumber FROM creditcard')
+            rv = cur.fetchall()
+            cur.close()
+            return jsonify(rv)
+    except mysql.connector.Error as error:
+        msg = "Error occured: {}".format(error)
+        return make_response(msg, 500)
+
 
 #Screen 1 (User Login)
 @app.route('/user_login', methods=['POST'])
@@ -711,11 +725,8 @@ def user_filter_visitHistory():
                 return make_response("Minimum Date must be before Maximum Date",400)           
         try:
             cur = connection.cursor()
-            cur.callproc('user_filter_visitHistory', [user, minDate, maxDate])
-            if comName == 'ALL':
-                cur.execute("select thName as theater, concat(thStreet,', ',thCity,', ',thState,' ',thZipcode) as address, comName as company, visitDate from uservisithistory")
-            else:    
-                cur.execute("select thName as theater, concat(thStreet,', ',thCity,', ',thState,' ',thZipcode) as address, comName as company, visitDate from uservisithistory where comName = '{}'".format(comName))
+            cur.callproc('user_filter_visitHistory', [user, minDate, maxDate, comName])
+            cur.execute("select thName as theater, concat(thStreet,', ',thCity,', ',thState,' ',thZipcode) as address, comName as company, visitDate from uservisithistory")
             rv = cur.fetchall()
             items = [dict(zip([key[0] for key in cur.description],row)) for row in rv]
             cur.close()
