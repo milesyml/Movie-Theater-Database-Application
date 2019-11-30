@@ -13,7 +13,8 @@ class CreateTheater extends Component {
     zipcode: "",
     manager: "",
     capacity: "",
-    error: null
+    error: null,
+    success: null
   };
 
   componentDidMount() {
@@ -42,7 +43,7 @@ class CreateTheater extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    this.setState({ error: null });
+    this.setState({ error: null, success: null });
     fetch("http://localhost:5000/admin_create_theater", {
       method: "POST",
       headers: {
@@ -66,9 +67,11 @@ class CreateTheater extends Component {
           return response.statusText;
         }
       })
-      .then(message => console.log(message))
+      .then(message =>
+        this.setState({ success: "Successfully created theater." })
+      )
       .catch(err => {
-        if (err === "400") {
+        if (err.message === "400") {
           this.setState({ error: "Please check your inputs." });
         } else {
           this.setState({ error: "Internal Server Error." });
@@ -86,7 +89,7 @@ class CreateTheater extends Component {
   };
 
   fetchEligibleManagers = () => {
-    this.setState({ error: null });
+    this.setState({ error: null, success: null });
     fetch("http://localhost:5000/get_eligible_managers", {
       method: "POST",
       headers: {
@@ -240,8 +243,10 @@ class CreateTheater extends Component {
               Zipcode:{" "}
             </label>
             <input
-              type="zipcode"
+              type="text"
               id="zipcode"
+              maxLength="5"
+              size="6"
               onChange={this.handleChange}
             ></input>
           </div>
@@ -250,8 +255,10 @@ class CreateTheater extends Component {
               Capacity:{" "}
             </label>
             <input
-              type="capacity"
+              type="text"
               id="capacity"
+              maxLength="5"
+              size="6"
               onChange={this.handleChange}
             ></input>
             <label htmlFor="manager" style={{ padding: 10 }}>
@@ -265,11 +272,14 @@ class CreateTheater extends Component {
           {this.state.error && (
             <div className="alert alert-danger">{this.state.error}</div>
           )}
+          {this.state.success && (
+            <div className="alert alert-success">{this.state.success}</div>
+          )}
 
           <div>
-            <Link to="/">
-              <Button style={this.btnStyle}>Back</Button>
-            </Link>
+            <Button onClick={this.props.history.goBack} style={this.btnStyle}>
+              Back
+            </Button>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <Button style={this.btnStyle} onClick={this.handleSubmit}>
               Create

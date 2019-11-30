@@ -5,7 +5,9 @@ class CreateMovie extends Component {
   state = {
     Name: "",
     Duration: "",
-    rday: ""
+    rday: "",
+    error: null,
+    success: null
   };
 
   handleChange = e => {
@@ -15,9 +17,36 @@ class CreateMovie extends Component {
   };
 
   handleSubmit = e => {
-    console.log("Submit");
     e.preventDefault();
-    console.log(this.state);
+    this.setState({ error: null, success: null });
+    fetch("http://localhost:5000/admin_create_mov", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: this.state.Name,
+        duration: this.state.Duration,
+        releaseDate: this.state.rday
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.statusText;
+        }
+      })
+      .then(message =>
+        this.setState({ success: "Successfully created movie." })
+      )
+      .catch(err => {
+        if (err.message === "400") {
+          this.setState({ error: "Please check your inputs." });
+        } else {
+          this.setState({ error: "Internal Server Error." });
+        }
+      });
   };
 
   style = {
@@ -48,8 +77,10 @@ class CreateMovie extends Component {
               Duration:{" "}
             </label>
             <input
-              type="Duration"
+              type="text"
               id="Duration"
+              maxLength="3"
+              size="4"
               onChange={this.handleChange}
             ></input>
           </div>
@@ -60,10 +91,17 @@ class CreateMovie extends Component {
             <input type="date" id="rday" onChange={this.handleChange}></input>
           </div>
 
+          {this.state.error && (
+            <div className="alert alert-danger">{this.state.error}</div>
+          )}
+          {this.state.success && (
+            <div className="alert alert-success">{this.state.success}</div>
+          )}
+
           <div>
-            <Link to="/">
-              <Button style={this.btnStyle}>Back</Button>
-            </Link>
+            <Button onClick={this.props.history.goBack} style={this.btnStyle}>
+              Back
+            </Button>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <Button style={this.btnStyle} onClick={this.handleSubmit}>
               Create

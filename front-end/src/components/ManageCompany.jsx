@@ -102,11 +102,6 @@ class ManageCompany extends Component {
   };
 
   createTheater = () => {
-    if (!this.state.selected) {
-      this.setState({ showEmptyError: true });
-      return;
-    }
-
     this.props.history.push("/createTheater");
   };
 

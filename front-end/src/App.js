@@ -84,7 +84,15 @@ class App extends Component {
             ></Route>
             <Route path="/createTheater" component={CreateTheater}></Route>
             <Route path="/createMovie" component={CreateMovie}></Route>
-            <Route path="/scheduleMovie" component={ScheduleMovie}></Route>
+            <Route
+              path="/scheduleMovie"
+              render={props => (
+                <ScheduleMovie
+                  {...props}
+                  getCurrentUser={this.getCurrentUser}
+                />
+              )}
+            />
             <Route
               path="/adminCustomerFunctionality"
               render={props => (

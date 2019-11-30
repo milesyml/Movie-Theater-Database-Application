@@ -65,7 +65,7 @@
 
 .grid-2-col-3-row {
   display: grid;
-  grid-template-columns: 300px 220px;
+  grid-template-columns: 300px 230px;
   grid-template-rows: 1fr 1fr 1fr;
   column-gap: 10px;
   justify-content: center;
@@ -76,7 +76,7 @@
 
 .grid-2-col-2-row-22 {
   display: grid;
-  grid-template-columns: 300px 220px;
+  grid-template-columns: 300px 230px;
   grid-template-rows: 1fr 1fr;
   column-gap: 10px;
   justify-content: center;
