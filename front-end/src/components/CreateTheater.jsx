@@ -3,25 +3,113 @@ import { Form, Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
 class CreateTheater extends Component {
   state = {
-    Name: "",
-    company: "4400TC",
+    theaterName: "",
+    companyName: "",
+    allCompanyNames: [],
+    allManagerNames: [],
     address: "",
+    city: "",
     state: "AL",
     zipcode: "",
-    manager: ""
+    manager: "",
+    capacity: "",
+    error: null
   };
 
+  componentDidMount() {
+    fetch("http://localhost:5000/get_companies", {
+      method: "GET"
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.json();
+        }
+      })
+      .then(data =>
+        this.setState({ allCompanyNames: data, companyName: data[0][0] })
+      )
+      .then(something => this.fetchEligibleManagers())
+      .catch(err => this.setState({ error: "Internal Server Error." }));
+  }
+
   handleChange = e => {
-    console.log("Change");
     this.setState({
       [e.target.id]: e.target.value
     });
   };
 
   handleSubmit = e => {
-    console.log("Submit");
     e.preventDefault();
-    console.log(this.state);
+    this.setState({ error: null });
+    fetch("http://localhost:5000/admin_create_theater", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        thName: this.state.theaterName,
+        comName: this.state.companyName,
+        street: this.state.address,
+        city: this.state.city,
+        state: this.state.state,
+        zipCode: this.state.zipcode,
+        capacity: this.state.capacity,
+        managerUser: this.state.manager
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.statusText;
+        }
+      })
+      .then(message => console.log(message))
+      .catch(err => {
+        if (err === "400") {
+          this.setState({ error: "Please check your inputs." });
+        } else {
+          this.setState({ error: "Internal Server Error." });
+        }
+      });
+  };
+
+  handleCompanyChange = e => {
+    this.setState(
+      {
+        [e.target.id]: e.target.value
+      },
+      () => this.fetchEligibleManagers()
+    );
+  };
+
+  fetchEligibleManagers = () => {
+    this.setState({ error: null });
+    fetch("http://localhost:5000/get_eligible_managers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        comName: this.state.companyName
+      })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.status);
+        } else {
+          return response.json();
+        }
+      })
+      .then(data =>
+        this.setState({
+          allManagerNames: data,
+          manager: data.length === 0 ? "" : data[0][0]
+        })
+      )
+      .catch(err => this.setState({ error: "Internal Server Error." }));
   };
 
   style = {
@@ -34,6 +122,26 @@ class CreateTheater extends Component {
     margin: 10
   };
 
+  renderCompanyNames = () => {
+    return this.state.allCompanyNames.map((companyName, index) => {
+      return (
+        <option key={index} value={companyName[0]}>
+          {companyName[0]}
+        </option>
+      );
+    });
+  };
+
+  renderManagerNames = () => {
+    return this.state.allManagerNames.map((managerName, index) => {
+      return (
+        <option key={index} value={managerName[0]}>
+          {managerName[0]}
+        </option>
+      );
+    });
+  };
+
   render() {
     return (
       <div
@@ -43,19 +151,19 @@ class CreateTheater extends Component {
         <h1>Create Theater</h1>
         <Form onSubmit={this.handleSubmit}>
           <div className="InputField" style={this.style}>
-            <label htmlFor="Name" style={{ padding: 10 }}>
+            <label htmlFor="theaterName" style={{ padding: 10 }}>
               Name:{" "}
             </label>
-            <input type="Name" id="Name" onChange={this.handleChange}></input>
+            <input
+              type="theaterName"
+              id="theaterName"
+              onChange={this.handleChange}
+            ></input>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <label htmlFor="company" style={{ padding: 10 }}>
-              Company:{" "}
-            </label>
-            <select id="company" onChange={this.handleChange}>
-              <option value="4400TC">4400TC</option>
-              <option value="AITC">AITC</option>
-              <option value="ATC">ATC</option>
-              <option value="EZTC">EZTC</option>
+            <label htmlFor="companyName">Company Name</label>
+            &nbsp;
+            <select id="companyName" onChange={this.handleCompanyChange}>
+              {this.renderCompanyNames()}
             </select>
           </div>
           <div>
@@ -77,7 +185,7 @@ class CreateTheater extends Component {
               State:{" "}
             </label>
             <select id="state" onChange={this.handleChange}>
-              <option value="AL">AL</option>
+              <option defaultValue="AL">AL</option>
               <option value="AK">AK</option>
               <option value="AZ">AZ</option>
               <option value="AR">AR</option>
@@ -150,12 +258,13 @@ class CreateTheater extends Component {
               Manager:{" "}
             </label>
             <select id="manager" onChange={this.handleChange}>
-              <option value="4400TC">4400TC</option>
-              <option value="AITC">AITC</option>
-              <option value="ATC">ATC</option>
-              <option value="EZTC">EZTC</option>
+              {this.renderManagerNames()}
             </select>
           </div>
+
+          {this.state.error && (
+            <div className="alert alert-danger">{this.state.error}</div>
+          )}
 
           <div>
             <Link to="/">

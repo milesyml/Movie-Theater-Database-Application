@@ -369,6 +369,7 @@ def get_eligible_managers():
 def admin_create_theater():
     if request.method == "POST":
         details = request.json
+        print(details)
         thName, comName, street = details['thName'], details['comName'], details['street']
         city, state, zipCode,  = details['city'], details['state'], details['zipCode']
         capacity, managerUser = details['capacity'], details['managerUser']
