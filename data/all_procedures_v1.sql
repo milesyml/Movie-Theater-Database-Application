@@ -56,6 +56,9 @@ BEGIN
 	WHERE Username = i_username);
 	IF (CHAR_LENGTH(i_creditCardNum) = 16) AND (creditCardCount < 5) THEN
 		INSERT INTO creditcard (username, creditcardnumber) VALUES (i_username, i_creditCardNum);
+	ELSE 
+		SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'Credit card count exceeds.';
 	END IF;
 END$$
 DELIMITER ;
@@ -73,7 +76,10 @@ BEGIN
 		INSERT INTO user (username, password, firstname, lastname) VALUES (i_username, MD5(i_password), i_firstname, i_lastname);
 		INSERT INTO employee (username) VALUES (i_username);
         INSERT INTO manager (username, street, city, state, zipcode, company) VALUES (i_username, i_empStreet, i_empCity, i_empState, i_empZipcode, i_comName);
-	END IF;
+	ELSE 
+		SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'Manager address is not unique';
+    END IF;
 END$$
 DELIMITER ;
 
@@ -91,6 +97,9 @@ BEGIN
 		INSERT INTO employee (username) VALUES (i_username);
         INSERT INTO manager (username, street, city, state, zipcode, company) VALUES (i_username, i_empStreet, i_empCity, i_empState, i_empZipcode, i_comName);
 		INSERT INTO customer (username) VALUES (i_username);
+	ELSE 
+		SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'Manager address is not unique';
 	END IF;
 END$$
 DELIMITER ;
@@ -107,6 +116,9 @@ BEGIN
 	WHERE Username = i_username);
 	IF (CHAR_LENGTH(i_creditCardNum) = 16) AND (creditCardCount < 5) THEN
 		INSERT INTO creditcard (username, creditcardnumber) VALUES (i_username, i_creditCardNum);
+	ELSE 
+		SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'Credit card number exceeds';
 	END IF;
 END$$
 DELIMITER ;
@@ -229,10 +241,8 @@ DROP PROCEDURE IF EXISTS admin_create_theater;
 DELIMITER $$
 CREATE PROCEDURE `admin_create_theater`(IN i_thName VARCHAR(50), IN i_comName VARCHAR(50), IN i_thStreet VARCHAR(50), IN i_thCity VARCHAR(50), IN i_thState CHAR(2), IN i_thZipcode CHAR(5), IN i_capacity INT, IN i_managerUsername VARCHAR(50))    
 BEGIN
-	IF i_comName in (SELECT Company FROM manager WHERE Username = i_managerUsername) THEN
 		INSERT INTO theater (Company, Name, Capacity, Street, City, State, Zipcode, ManagerUsername)
         VALUES (i_comName, i_thName, i_capacity, i_thStreet, i_thCity, i_thState, i_thZipcode, i_managerUsername);
-	END IF;	
 END$$
 DELIMITER ;
 
@@ -275,8 +285,6 @@ END$$
 DELIMITER ;
 
 -- screen 18: manager filter theater
--- error here, table should be empty when a manager doesn't manage theater yet.
--- Is the current version correct???
 DROP PROCEDURE IF EXISTS manager_filter_th;
 DELIMITER $$
 CREATE PROCEDURE `manager_filter_th`(IN i_manUsername VARCHAR(50), IN i_movName VARCHAR(50), IN i_minMovDuration INT, IN i_maxMovDuration INT, IN i_minMovReleaseDate Date, IN i_maxMovReleaseDate Date, IN i_minMovPlayDate Date, IN  i_maxMovPlayDate Date, IN i_includeNotPlayed Boolean)
@@ -329,6 +337,9 @@ BEGIN
 			SELECT i_movName, i_movReleaseDate, i_movPlayDate, Name, Company
 			FROM Theater
 			WHERE ManagerUserName = i_manUsername;
+	ELSE 
+		SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'Invalid movie play date';
 	END IF;
 END$$
 DELIMITER ;
@@ -381,6 +392,9 @@ BEGIN
 	IF (mov_view_count < 3) THEN
 		INSERT INTO customerviewmovie (Movie,  ReleaseDate, ViewDate, Theater, Company, CreditCardNumber) 
 		VALUES (i_movName, i_movReleaseDate, i_movPlayDate, i_thName, i_comName, i_creditCardNum); 
+	ELSE 
+		SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'Not able to view more than three movies per day';
 	END IF;
 END$$
 DELIMITER ;
